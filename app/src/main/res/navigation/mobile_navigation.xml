@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_home">
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.example.foractorwithrepetition.ui.home.HomeFragment"
+        android:label="@string/menu_home"
+        tools:layout="@layout/fragment_home" />
+
+<!--    <fragment-->
+<!--        android:id="@+id/nav_home"-->
+<!--        android:name="com.example.foractorwithrepetition.ui.gallery.GalleryFragment"-->
+<!--        android:label="@string/menu_home"-->
+<!--        tools:layout="@layout/fragment_gallery" />-->
+
+    <fragment
+        android:id="@+id/nav_gallery"
+        android:name="com.example.foractorwithrepetition.ui.gallery.GalleryFragment"
+        android:label="@string/menu_gallery"
+        tools:layout="@layout/fragment_gallery" />
+
+    <fragment
+        android:id="@+id/nav_slideshow"
+        android:name="com.example.foractorwithrepetition.ui.slideshow.SlideshowFragment"
+        android:label="@string/menu_slideshow"
+        tools:layout="@layout/fragment_slideshow" />
+
+    <fragment
+        android:id="@+id/nav_qr"
+        android:name="com.example.foractorwithrepetition.ui.qrcode.qrCodeFragment"
+        android:label="@string/qr_blank"
+        tools:layout="@layout/fragment_qr" />
+    <fragment
+        android:id="@+id/nav_qr_generate"
+        android:name="com.example.foractorwithrepetition.ui.createQR.CreateQRFragment"
+        android:label="@string/qr_blank"
+        tools:layout="@layout/fragment_create_q_r" />
+    <action
+        android:id="@+id/action_qrCodeFragment_to_createQRFragment"
+        app:destination="@id/nav_qr_generate" />
+    <fragment
+        android:id="@+id/nav_detail_theatre"
+        android:name="com.example.foractorwithrepetition.ui.detail.FragmentDetail"
+        android:label="@string/menu_slideshow"
+        tools:layout="@layout/fragment_fragment_detail" />
+    <action
+        android:id="@+id/action_yourCurrentFragment_to_fragmentDetail"
+        app:destination="@id/nav_detail_theatre" >
+
+    </action>
+
+</navigation>

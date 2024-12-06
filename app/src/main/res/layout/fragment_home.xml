@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.home.HomeFragment"
+    android:orientation="vertical"
+    xmlns:mapkit="http://yandex.ru/apk/res-auto">
+
+    <EditText
+        android:id="@+id/rehearsalName"
+        android:layout_width="match_parent"
+        android:layout_height="68dp"
+        android:hint="Описание" />
+
+    <!--    <EditText-->
+    <!--        android:id="@+id/rehearsalTime"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:hint="Время репетиции"-->
+    <!--        android:minHeight="48dp" />-->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Выберите дату" />
+
+    <EditText
+        android:id="@+id/rehearsalDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:focusable="false"
+        android:hint="Дата репетиции"
+        android:minHeight="48dp" />
+    <!--    <DatePicker android:id="@+id/dataPicker"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:focusable="false">-->
+    <!--    </DatePicker>-->
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Выберите время" />
+
+    <TimePicker
+        android:id ="@+id/timePicker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:layout_gravity="center"
+        android:timePickerMode="spinner" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Выберите место" />
+
+    <EditText
+        android:id="@+id/coordinate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Координаты"
+        android:minHeight="48dp" />
+
+    <com.yandex.mapkit.mapview.MapView
+        android:id="@+id/mapview"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_gravity="center"/>
+
+    <!--    <EditText-->
+    <!--        android:id="@+id/rehearsalTime"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:hint="Время репетиции"-->
+    <!--        android:focusable="false"-->
+    <!--        android:minHeight="48dp" />-->
+
+    <Button
+        android:id="@+id/addButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Добавить"
+        android:layout_gravity="center"/>
+</LinearLayout>
