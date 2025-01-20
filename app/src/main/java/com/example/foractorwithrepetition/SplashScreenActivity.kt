@@ -12,7 +12,8 @@ class SplashScreenActivity : AppCompatActivity() {
         setContentView(R.layout.activity_splash_screen)
         // Создаем задержку перед переходом к MainActivity
         Handler().postDelayed({
-            val intent = Intent(this,  ActivityWithDrawerNavigation::class.java)
+            //val intent = Intent(this,  ActivityWithDrawerNavigation::class.java)
+            val intent = Intent(this,  LoginRegistration::class.java)
             startActivity(intent)
             finish() // Закрываем SplashActivity
         }, SPLASH_TIME_OUT)

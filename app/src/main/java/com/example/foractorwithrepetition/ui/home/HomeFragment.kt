@@ -1,6 +1,6 @@
 package com.example.foractorwithrepetition.ui.home
 
-import android.Manifest
+
 import android.app.AlarmManager
 import android.app.DatePickerDialog
 import android.app.NotificationChannel
@@ -8,7 +8,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -18,9 +17,6 @@ import android.widget.DatePicker
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.core.content.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.foractorwithrepetition.AlarmReceiver
@@ -45,9 +41,6 @@ class HomeFragment : Fragment() {
     private lateinit var rehearsalAdapter: RehearsalAdapter
     private val REQUEST_LOCATION_PERMISSION = 1
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
-
     private val binding get() = _binding!!
     //val binding = FragmentHomeBinding.inflate(inflater, container, false)
 
@@ -60,18 +53,15 @@ class HomeFragment : Fragment() {
         true
     }
 
-        //@RequiresApi(Build.VERSION_CODES.O)
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-//        val homeViewModel =
-//            ViewModelProvider(this).get(HomeViewModel::class.java)
+
         // Инициализация binding
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
-
 
         val imageProvider = ImageProvider.fromResource(requireContext(), R.drawable.geometka)
         val placemark = binding.mapview.map.mapObjects.addPlacemark().apply {
@@ -84,24 +74,15 @@ class HomeFragment : Fragment() {
         createNotificationChannel() //Создание канала отправки уведомления
         val root: View = binding.root
         binding.timePicker.setIs24HourView(true)
-
         binding.rehearsalDate.setOnClickListener { showDatePickerDialog() }
-
         alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-        //
         rehearsalViewModel = ViewModelProvider(this).get(RehearsalViewModel::class.java)
 
         binding.addButton.setOnClickListener { onAddButtonClicked() }
-
         rehearsalViewModel.getAllRehearsals().observe(viewLifecycleOwner) { rehearsals ->
             rehearsalAdapter = RehearsalAdapter(rehearsals.toMutableList())
             rehearsalAdapter.updateRehearsals(rehearsals)
         }
-//        val textView: TextView = binding.textHome
-//        homeViewModel.text.observe(viewLifecycleOwner) {
-//            textView.text = it
-//        }
         return root
     }
 
@@ -126,66 +107,11 @@ class HomeFragment : Fragment() {
         if (name.isNotEmpty() && date.isNotEmpty()) {
             //checkAndRequestPermissions(name)
             setAlarm(name)
+            addEventToGoogleCalendar(name, date)
         }else{
             Toast.makeText(requireContext(), "Вы не заполнили все поля", Toast.LENGTH_LONG).show()
         }
     }
-
-//    @RequiresApi(Build.VERSION_CODES.S)
-//    private fun checkAndRequestPermissions(name: String) {
-//        if (ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.SCHEDULE_EXACT_ALARM) != PackageManager.PERMISSION_GRANTED) {
-//            ActivityCompat.requestPermissions(requireActivity(), arrayOf(Manifest.permission.SCHEDULE_EXACT_ALARM), SCHEDULE_EXACT_ALARM_PERMISSION_REQUEST_CODE)
-//        } else {
-//            if (canScheduleExactAlarms()) {
-//                setAlarm(name)
-//            } else {
-//                Toast.makeText(requireContext(), "Точные будильники не могут быть запланированы.", Toast.LENGTH_SHORT).show()
-//            }
-//        }
-//    }
-//
-//    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-//        if (requestCode == SCHEDULE_EXACT_ALARM_PERMISSION_REQUEST_CODE) {
-//            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                val name = binding.rehearsalName.text.toString()
-//                if (name.isNotEmpty() && canScheduleExactAlarms()) {
-//                    setAlarm(name)
-//                } else {
-//                    Toast.makeText(requireContext(), "Точные будильники не могут быть запланированы.", Toast.LENGTH_SHORT).show()
-//                }
-//            } else {
-//                Toast.makeText(requireContext(), "Разрешение для установки будильника отклонено.", Toast.LENGTH_SHORT).show()
-//            }
-//        }else{
-//            Toast.makeText(requireContext(), "ГАСИТСЯ ПОЧЕМУ.", Toast.LENGTH_SHORT).show()
-//        }
-//    }
-//    // Запрос на разрешение местоположения
-//    private fun checkRequestLocationPermission(){
-//        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
-//            != PackageManager.PERMISSION_GRANTED) {
-//            ActivityCompat.requestPermissions(requireActivity(),
-//                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-//                REQUEST_LOCATION_PERMISSION);
-//        }else{
-//            // Разрешение уже предоставлено, можно запросить обновления местоположения
-//            //requestLocationUpdates()
-//        }
-//    }
-//    // Обработка результата запроса разрешений
-//    fun onRequestPermissionsLocationResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-//        if (requestCode == REQUEST_LOCATION_PERMISSION) {
-//            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                // Разрешение получено, можно запросить обновления местоположения
-//                //requestLocationUpdates()
-//            } else {
-//                // Разрешение отклонено, обработайте это
-//                Toast.makeText(this, "Разрешение на доступ к местоположению отклонено.", Toast.LENGTH_SHORT).show()
-//            }
-//        }
-//    }
 
     private fun setAlarm(name: String) {
         showDialog{result->
@@ -221,12 +147,6 @@ class HomeFragment : Fragment() {
         }
     }
 
-//    private fun canScheduleExactAlarms(): Boolean {
-//        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-//            val alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
-//            alarmManager.canScheduleExactAlarms()
-//        } else true
-//    }
 
     private fun createNotificationChannel() {
         val channel = NotificationChannel(CHANNEL_ID, "Rehearsal Notifications", NotificationManager.IMPORTANCE_DEFAULT).apply {
@@ -266,8 +186,54 @@ class HomeFragment : Fragment() {
         dialog.show()
     }
 
+    private fun addEventToGoogleCalendar(name: String, date: String) {
+        val dateParts = date.split("/")
+        if (dateParts.size != 3) {
+            Toast.makeText(requireContext(), "Неверный формат даты", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val calendar = Calendar.getInstance().apply {
+//            set(Calendar.YEAR, dateParts[2].toInt())
+//            set(Calendar.MONTH, dateParts[1].toInt() - 1)
+//            set(Calendar.DAY_OF_MONTH, dateParts[0].toInt())
+//            val timeParts = time.split(":")
+//            if (timeParts.size == 2) {
+//                set(Calendar.HOUR_OF_DAY, timeParts[0].toInt())
+//                set(Calendar.MINUTE, timeParts[1].toInt())
+//            }
+            set(Calendar.YEAR, dateParts[2].toInt())
+            set(Calendar.MONTH, dateParts[1].toInt() - 1)
+            set(Calendar.DAY_OF_MONTH, dateParts[0].toInt())
+            set(Calendar.HOUR_OF_DAY, binding.timePicker.hour)
+            set(Calendar.MINUTE, binding.timePicker.minute)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+
+        val intent = Intent(Intent.ACTION_INSERT).apply {
+            data = android.provider.CalendarContract.Events.CONTENT_URI
+            putExtra(android.provider.CalendarContract.Events.TITLE, name)
+            putExtra(android.provider.CalendarContract.Events.DESCRIPTION, "Репетиция")
+            putExtra(android.provider.CalendarContract.Events.EVENT_LOCATION, binding.coordinate.text.toString())
+            putExtra(android.provider.CalendarContract.EXTRA_EVENT_BEGIN_TIME, calendar.timeInMillis)
+            putExtra(android.provider.CalendarContract.EXTRA_EVENT_END_TIME, calendar.timeInMillis + 60 * 60 * 1000) // 1 час
+        }
+
+        if (intent.resolveActivity(requireContext().packageManager) != null) {
+            startActivity(intent)
+        } else {
+            Toast.makeText(requireContext(), "Приложение Календарь не установлено", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
+
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
+
+
 }

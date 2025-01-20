@@ -7,6 +7,13 @@ plugins {
 android {
     namespace = "com.example.foractorwithrepetition"
     compileSdk = 34
+    packagingOptions {
+        exclude ("META-INF/DEPENDENCIES")
+        exclude ("META-INF/LICENSE")
+        exclude ("META-INF/LICENSE.txt")
+        exclude ("META-INF/NOTICE")
+        exclude ("META-INF/NOTICE.txt")
+    }
 
     defaultConfig {
         applicationId = "com.example.foractorwithrepetition"
@@ -69,6 +76,11 @@ dependencies {
     implementation("com.github.denzcoskun:ImageSlideshow:0.1.0")
     //implementation ("com.yandex.android:mapkit:4.3.1")
     implementation ("com.github.bumptech.glide:glide:4.12.0")
+
+    implementation ("com.google.android.gms:play-services-auth:20.6.0")
+    implementation ("com.google.api-client:google-api-client-android:1.34.0")
+    implementation ("com.google.api-client:google-api-client-gson:1.34.0")
+
 
 
 }

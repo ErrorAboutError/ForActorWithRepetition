@@ -95,13 +95,7 @@ class AdapterDataTheatreClass(
         return dataList.size
     }
 
-//    class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-//        var recImage: ImageView? = itemView.findViewById(R.id.recImage)
-//        var recCard: CardView? = itemView.findViewById(R.id.recCard)
-//        var recTitle: TextView? = itemView.findViewById(R.id.recTitle)
-//        var recDesc: TextView? = itemView.findViewById(R.id.recDesc)
-//        var recLang: TextView? = itemView.findViewById(R.id.recLang)
-//    }
+
      inner class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val recImage: ImageView? = itemView.findViewById(R.id.recImage)
         val recTitle: TextView? = itemView.findViewById(R.id.recTitle)
@@ -119,18 +113,6 @@ class AdapterDataTheatreClass(
         }
 
     }
-//    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
-//        val itemView = LayoutInflater.from(context).inflate(R.layout.fragment_slideshow, parent, false)
-//        return MyViewHolder(itemView)
-//    }
-
-//    override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-//        val currentItem = dataList[position]
-//        holder.recImage?.setImageResource(currentItem.getDataImage())
-//        holder.recTitle?.text = currentItem.getDataTitle()
-//        holder.recDesc?.text = context.getString(currentItem.getDataDesc())
-//        holder.recLang?.text = currentItem.getDataLang()
-//    }
 
 }
 
