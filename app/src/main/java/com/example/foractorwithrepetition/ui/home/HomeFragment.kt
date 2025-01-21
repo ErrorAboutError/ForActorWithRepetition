@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,6 +27,7 @@ import com.example.foractorwithrepetition.RehearsalAdapter
 import com.example.foractorwithrepetition.RehearsalViewModel
 import com.example.foractorwithrepetition.databinding.FragmentHomeBinding
 import com.yandex.mapkit.MapKitFactory
+import com.yandex.mapkit.Time
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.MapObjectTapListener
 import com.yandex.runtime.image.ImageProvider
@@ -40,6 +42,7 @@ class HomeFragment : Fragment() {
     private lateinit var rehearsalViewModel: RehearsalViewModel
     private lateinit var rehearsalAdapter: RehearsalAdapter
     private val REQUEST_LOCATION_PERMISSION = 1
+    var code = 0
 
     private val binding get() = _binding!!
     //val binding = FragmentHomeBinding.inflate(inflater, container, false)
@@ -81,7 +84,9 @@ class HomeFragment : Fragment() {
         binding.addButton.setOnClickListener { onAddButtonClicked() }
         rehearsalViewModel.getAllRehearsals().observe(viewLifecycleOwner) { rehearsals ->
             rehearsalAdapter = RehearsalAdapter(rehearsals.toMutableList())
+
             rehearsalAdapter.updateRehearsals(rehearsals)
+            code = rehearsals.size + 1
         }
         return root
     }
@@ -132,14 +137,13 @@ class HomeFragment : Fragment() {
                         }
                     }
                 }
-
                 val alarmIntent = Intent(requireContext(), AlarmReceiver::class.java).apply {
                     putExtra("rehearsal_name", name)
                 }.let {
-                    PendingIntent.getBroadcast(requireContext(), System.currentTimeMillis().toInt(), it, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE )
+                    PendingIntent.getBroadcast(requireContext(), code++, it, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE )
                 }
                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, alarmIntent)
-                rehearsalViewModel.insert(Rehearsal(name = name, time = "${binding.timePicker.hour}:${binding.timePicker.minute}"))
+                rehearsalViewModel.insert(Rehearsal(name = name, time = "${binding.timePicker.hour}:${binding.timePicker.minute}", date = "${binding.rehearsalDate.text}", timeInMiles = calendar.timeInMillis, activated = true))
                 binding.rehearsalName.text.clear()
                 binding.rehearsalDate.text.clear()
                 binding.coordinate.text.clear()
@@ -227,13 +231,8 @@ class HomeFragment : Fragment() {
         }
     }
 
-
-
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
-
-
 }

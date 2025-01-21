@@ -12,7 +12,7 @@ class RehearsalViewModel(application: Application) : AndroidViewModel(applicatio
     private val database: AppDatabase
 
     init {
-        database = Room.databaseBuilder(application, AppDatabase::class.java, "rehearsal-db").build()
+        database = Room.databaseBuilder(application, AppDatabase::class.java, "rehearsalv1.12-db").build()
         rehearsalDao = database.rehearsalDao()
     }
 
@@ -20,6 +20,11 @@ class RehearsalViewModel(application: Application) : AndroidViewModel(applicatio
         emit(rehearsalDao.getAllRehearsals())
     }
 
+    fun updateActivation(position: Long, activated: Boolean){
+        viewModelScope.launch {
+            rehearsalDao.update(position, activated)
+        }
+    }
     fun insert(rehearsal: Rehearsal) {
         viewModelScope.launch {
             rehearsalDao.insert(rehearsal)

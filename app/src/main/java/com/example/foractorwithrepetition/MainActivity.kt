@@ -115,7 +115,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, alarmIntent)
-        rehearsalViewModel.insert(Rehearsal(name = name, time = "${timePicker.hour}:${timePicker.minute}"))
+        //rehearsalViewModel.insert(Rehearsal(name = name, time = "${timePicker.hour}:${timePicker.minute}", date = "42", activated = true))
         findViewById<EditText>(R.id.rehearsalName).text.clear()
     }
 
