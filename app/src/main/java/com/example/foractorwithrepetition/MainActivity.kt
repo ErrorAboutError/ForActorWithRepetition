@@ -11,7 +11,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
 import android.widget.DatePicker
 import android.widget.EditText
@@ -21,13 +20,8 @@ import android.widget.Toolbar
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupWithNavController
-import com.google.android.material.navigation.NavigationView
 import java.util.Calendar
 
 class MainActivity : AppCompatActivity() {
@@ -115,7 +109,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, alarmIntent)
-        rehearsalViewModel.insert(Rehearsal(name = name, time = "${timePicker.hour}:${timePicker.minute}"))
+        //rehearsalViewModel.insert(Rehearsal(name = name, time = "${timePicker.hour}:${timePicker.minute}", date = "42", activated = true))
         findViewById<EditText>(R.id.rehearsalName).text.clear()
     }
 

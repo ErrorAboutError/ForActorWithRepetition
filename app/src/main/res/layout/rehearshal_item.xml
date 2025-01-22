@@ -20,10 +20,11 @@
         android:background="#333333">
 
         <!-- First LinearLayout for title and time -->
+
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="15"
             android:orientation="vertical">
 
             <TextView
@@ -44,6 +45,24 @@
                 android:textColor="#DDDDDD"
                 android:fontFamily="sans-serif"
                 android:layout_marginTop="4dp" />
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="1dp"
+            android:layout_weight="20"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/placeText"
+                android:textSize="15sp"
+                android:text="г. Санкт-Петербург, ул. Большая Морская д. 89. лит. А"
+                android:textColor="#DDDDDD"
+                android:fontFamily="sans-serif"
+                android:gravity="center"
+                android:layout_marginLeft="10dp">
+
+            </TextView>
         </LinearLayout>
 
         <!-- Second LinearLayout for date and switch -->

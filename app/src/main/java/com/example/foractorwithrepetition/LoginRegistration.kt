@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -27,7 +28,7 @@ class LoginRegistration : AppCompatActivity() {
         setupGoogleSignIn()
 
         // Обработка нажатия кнопки Google Sign-In
-        val googleSignInButton = findViewById<MaterialButton>(R.id.signin_google)
+        val googleSignInButton = findViewById<ImageButton>(R.id.signin_google)
         googleSignInButton.setOnClickListener {
             signInWithGoogle()
         }

@@ -11,15 +11,27 @@ class RehearsalViewModel(application: Application) : AndroidViewModel(applicatio
     private val rehearsalDao: RehearsalDao
     private val database: AppDatabase
 
+    // Получение доступа к БД/создание БД
     init {
-        database = Room.databaseBuilder(application, AppDatabase::class.java, "rehearsal-db").build()
+        database = Room.databaseBuilder(application, AppDatabase::class.java, "rehearsalv1.14-db").build()
         rehearsalDao = database.rehearsalDao()
     }
 
+    // Получение списка оповещений
     fun getAllRehearsals() = liveData {
         emit(rehearsalDao.getAllRehearsals())
     }
 
+    // Обновление статуса оповещения
+    // id - id оповещения
+    // activated - новый статус оповещения
+    fun updateActivation(id: Long, activated: Boolean){
+        viewModelScope.launch {
+            rehearsalDao.update(id, activated)
+        }
+    }
+    // Добавление оповещения
+    // rehearsal - новое оповещение
     fun insert(rehearsal: Rehearsal) {
         viewModelScope.launch {
             rehearsalDao.insert(rehearsal)

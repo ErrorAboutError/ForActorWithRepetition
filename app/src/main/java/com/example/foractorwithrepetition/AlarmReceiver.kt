@@ -16,7 +16,7 @@ class AlarmReceiver : BroadcastReceiver() {
         if (context != null) {
             // Отправка уведомления через NotificationHelper
             val notificationHelper = NotificationHelper(context)
-            notificationHelper.sendNotification("Время репетиции", rehearsalName)
+            notificationHelper.sendNotification("Время репетиции", rehearsalName, intent?.getStringExtra("coordinate").toString())
         }
     }
 }
