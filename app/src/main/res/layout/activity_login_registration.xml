@@ -40,15 +40,14 @@
                 android:layout_marginBottom="5dp">
             </View>
 
-            <Button
+            <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@drawable/google"
                 android:id="@+id/signin_google"
-
                 app:iconGravity="textStart"
-                android:text=""
+                android:background="@null"
+                android:src="@drawable/google"
                 android:backgroundTint="@color/darkBlue"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -57,7 +56,6 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.707"
                 tools:ignore="SpeakableTextPresentCheck"
-
                 />
 
         </LinearLayout>

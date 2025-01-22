@@ -13,7 +13,7 @@ class RehearsalViewModel(application: Application) : AndroidViewModel(applicatio
 
     // Получение доступа к БД/создание БД
     init {
-        database = Room.databaseBuilder(application, AppDatabase::class.java, "rehearsalv1.12-db").build()
+        database = Room.databaseBuilder(application, AppDatabase::class.java, "rehearsalv1.14-db").build()
         rehearsalDao = database.rehearsalDao()
     }
 

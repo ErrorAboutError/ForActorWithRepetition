@@ -9,7 +9,6 @@ import android.os.Bundle
 import android.view.Menu
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -22,7 +21,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.foractorwithrepetition.databinding.ActivityWithDrawerNavigationBinding
 import com.yandex.mapkit.MapKitFactory
-import com.yandex.mapkit.search.SearchFactory
 
 class ActivityWithDrawerNavigation : AppCompatActivity() {
 

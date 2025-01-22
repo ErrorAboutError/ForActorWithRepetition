@@ -2,7 +2,6 @@ package com.example.foractorwithrepetition.ui.gallery
 
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,8 +18,6 @@ class GalleryFragment : Fragment() {
     private lateinit var rehearsalViewModel: RehearsalViewModel
 
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
 
     override fun onCreateView(

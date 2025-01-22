@@ -18,5 +18,8 @@ data class Rehearsal (
     // Точное время оповещения
     val timeInMiles: Long,
     // Статус оповещения
-    var activated: Boolean
+    var activated: Boolean,
+    // Местоположение репитиции
+    val location: String,
+    val placeName: String
 )

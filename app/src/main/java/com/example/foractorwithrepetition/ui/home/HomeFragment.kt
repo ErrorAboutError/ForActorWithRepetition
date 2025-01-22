@@ -8,8 +8,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.graphics.PointF
-import android.location.Address
+import android.location.Geocoder
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -23,7 +22,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.foractorwithrepetition.AlarmReceiver
-import com.example.foractorwithrepetition.R
 import com.example.foractorwithrepetition.Rehearsal
 import com.example.foractorwithrepetition.RehearsalAdapter
 import com.example.foractorwithrepetition.RehearsalViewModel
@@ -33,19 +31,16 @@ import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.layers.GeoObjectTapListener
 import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.GeoObjectSelectionMetadata
-import com.yandex.mapkit.map.IconStyle
 import com.yandex.mapkit.map.InputListener
 import com.yandex.mapkit.map.Map
 import com.yandex.mapkit.map.MapWindow
-import com.yandex.mapkit.map.PlacemarkMapObject
-import com.yandex.runtime.image.ImageProvider
-import java.io.IOException
+import com.yandex.mapkit.search.Address
 import java.util.Calendar
+import java.util.Locale
 
 
 class HomeFragment : Fragment() {
 
-    private lateinit var placemarkMapObject: PlacemarkMapObject
     private var _binding: FragmentHomeBinding? = null
     private val CHANNEL_ID = "channelid"
     private val SCHEDULE_EXACT_ALARM_PERMISSION_REQUEST_CODE = 1
@@ -53,6 +48,7 @@ class HomeFragment : Fragment() {
     private lateinit var rehearsalViewModel: RehearsalViewModel
     private lateinit var rehearsalAdapter: RehearsalAdapter
     private val REQUEST_LOCATION_PERMISSION = 1
+    var selectedCoordinate = ""
     private lateinit var mapWindow: MapWindow
 
     var code = 0
@@ -61,33 +57,39 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
     //val binding = FragmentHomeBinding.inflate(inflater, container, false)
 
-    val inputListener = object : InputListener {
-        override fun onMapTap(map: Map, point: Point) {
-            Log.i("Tap", "Tap")
-        }
-
-        override fun onMapLongTap(map: Map, point: Point) {
-            Log.i("Tap", "LTap")
-
-            binding.coordinate.text.clear()
-            Log.i("Tap", "${point.latitude}:${point.longitude}")
-
-            binding.coordinate.append("${point.latitude}:${point.longitude}")
-        }
-    }
+    // Обработка нажатия на объект на карте
     private val geoObjectTapListener = GeoObjectTapListener {
-        // Move camera to selected geoObject
         val point = it.geoObject.geometry.firstOrNull()?.point ?: return@GeoObjectTapListener true
         binding.mapview.map.cameraPosition.run {
             val position = CameraPosition(point, zoom, azimuth, tilt)
             binding.mapview.map.move(position, SMOOTH_ANIMATION, null)
         }
-
-
         val selectionMetadata =
             it.geoObject.metadataContainer.getItem(GeoObjectSelectionMetadata::class.java)
         binding.mapview.map.selectGeoObject(selectionMetadata)
-        Log.i("Tap", selectionMetadata.toString())
+        val geocoder: Geocoder
+        val addresses: MutableList<android.location.Address>?
+        geocoder = Geocoder(requireActivity(), Locale.getDefault())
+
+        addresses = geocoder.getFromLocation(
+            point.latitude,
+            point.longitude,
+            1
+        )
+
+        val address: String =
+            addresses!![0].getAddressLine(0) // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+
+        val city: String = addresses[0].locality
+        val street: String = addresses[0].getAddressLine(0).split(",")[0]
+        val country: String = addresses[0].countryName
+        val knownName: String = addresses[0].featureName
+        Log.i("placement", "$country $city $street $knownName")
+        selectedCoordinate = "${binding.mapview.map.cameraPosition.target.latitude.toString()}, ${binding.mapview.map.cameraPosition.target.longitude.toString()}"
+        Log.i("placement", binding.mapview.map.cameraPosition.target.latitude.toString())
+        Log.i("placement", binding.mapview.map.cameraPosition.target.longitude.toString())
+        binding.coordinate.text.clear()
+        binding.coordinate.append("$country $city $street $knownName")
         true
     }
 
@@ -99,7 +101,6 @@ class HomeFragment : Fragment() {
     ): View {
 
         // Инициализация binding
-
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         createNotificationChannel() //Создание канала отправки уведомления
         val root: View = binding.root
@@ -116,19 +117,8 @@ class HomeFragment : Fragment() {
             code = rehearsals.size + 1
         }
 
-        placemarkMapObject = binding.mapview.map.mapObjects.addPlacemark().apply {
-            val geometry = Point(55.751225, 37.62954)
-            setIcon(
-                ImageProvider.fromResource(requireActivity(), R.drawable.geometka),
-                IconStyle().apply { anchor = PointF(0.5f, 1.0f) })
-            isDraggable = true
-            Log.i("geo", this.geometry.toString())
-
-        }
         mapWindow = binding.mapview.mapWindow
-        binding.mapview.map.addInputListener(inputListener)
         binding.mapview.map.addTapListener(geoObjectTapListener)
-        Log.i("End", "end")
         return root
     }
 
@@ -149,17 +139,17 @@ class HomeFragment : Fragment() {
     private fun onAddButtonClicked() {
         val name = binding.rehearsalName.text.toString()
         val date = binding.rehearsalDate.text.toString()
+        val coordinate = binding.coordinate.text.toString()
 
-        if (name.isNotEmpty() && date.isNotEmpty()) {
-            //checkAndRequestPermissions(name)
-            setAlarm(name)
+        if (name.isNotEmpty() && date.isNotEmpty() && coordinate.isNotEmpty()) {
+            setAlarm(name, coordinate)
             addEventToGoogleCalendar(name, date)
         }else{
             Toast.makeText(requireContext(), "Вы не заполнили все поля", Toast.LENGTH_LONG).show()
         }
     }
 
-    private fun setAlarm(name: String) {
+    private fun setAlarm(name: String, coordinate: String) {
         showDialog{result->
             if (result) {
                 alarmManager = requireActivity().getSystemService(Context.ALARM_SERVICE) as AlarmManager
@@ -182,12 +172,17 @@ class HomeFragment : Fragment() {
                 // Создание оповещения
                 val alarmIntent = Intent(requireContext(), AlarmReceiver::class.java).apply {
                     putExtra("rehearsal_name", name)
+                    putExtra("coordinate", selectedCoordinate)
+                    Log.i("coordinate3", selectedCoordinate)
                 }.let {
                     PendingIntent.getBroadcast(requireContext(), code++, it, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE )
                 }
+
                 // Добавление оповещения
                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, alarmIntent)
-                rehearsalViewModel.insert(Rehearsal(name = name, time = "${binding.timePicker.hour}:${binding.timePicker.minute}", date = "${binding.rehearsalDate.text}", timeInMiles = calendar.timeInMillis, activated = true))
+                rehearsalViewModel.insert(Rehearsal(name = name, time = "${binding.timePicker.hour}:${binding.timePicker.minute}",
+                    date = "${binding.rehearsalDate.text}", timeInMiles = calendar.timeInMillis, activated = true,
+                    location = selectedCoordinate, placeName = coordinate))
                 // Очистка полей
                 binding.rehearsalName.text.clear()
                 binding.rehearsalDate.text.clear()

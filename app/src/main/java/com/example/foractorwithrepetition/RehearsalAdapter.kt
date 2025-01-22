@@ -11,7 +11,6 @@ import android.view.ViewGroup
 import android.widget.Switch
 import android.widget.TextView
 import androidx.annotation.RequiresApi
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import com.yandex.runtime.Runtime.getApplicationContext
 
@@ -23,6 +22,7 @@ class RehearsalAdapter(private var rehearsals: MutableList<Rehearsal>) : Recycle
         val time: TextView = itemView.findViewById(R.id.timeText)
         val date: TextView = itemView.findViewById(R.id.dateText)
         val switcher: Switch = itemView.findViewById(R.id.toggleSwitch)
+        val place: TextView = itemView.findViewById(R.id.placeText)
     }
 
     lateinit var rehearsalViewModel: RehearsalViewModel
@@ -40,6 +40,8 @@ class RehearsalAdapter(private var rehearsals: MutableList<Rehearsal>) : Recycle
         // Включение активных оповещений
         if(rehearsals[position].activated)
             holder.switcher.setChecked(true)
+        // Заполнение местоположения репетиции
+        holder.place.text = rehearsals[position].placeName
         // Заполнение даты оповещения
         holder.date.text = rehearsals[position].date
         // Обработка нажатия на переключатель
