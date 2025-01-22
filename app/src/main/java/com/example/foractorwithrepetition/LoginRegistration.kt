@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -23,11 +24,17 @@ class LoginRegistration : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login_registration)
+        val lastInGoogle = GoogleSignIn.getLastSignedInAccount(this)
+        if(lastInGoogle!=null){
+            val intent = Intent(this, ActivityWithDrawerNavigation::class.java)
+            startActivity(intent)
+            finish()
+        }
         // Настройка авторизации Google
         setupGoogleSignIn()
 
         // Обработка нажатия кнопки Google Sign-In
-        val googleSignInButton = findViewById<MaterialButton>(R.id.signin_google)
+        val googleSignInButton = findViewById<ImageButton>(R.id.signin_google)
         googleSignInButton.setOnClickListener {
             signInWithGoogle()
         }
@@ -40,6 +47,10 @@ class LoginRegistration : AppCompatActivity() {
             if (task.isSuccessful) {
                 val account: GoogleSignInAccount? = task.result
                 Toast.makeText(this, "Авторизация успешна!", Toast.LENGTH_SHORT).show()
+                // Переход на новую активность после успешного входа
+                val intent = Intent(this, ActivityWithDrawerNavigation::class.java)
+                startActivity(intent)
+                finish()
             } else {
                 Toast.makeText(this, "Ошибка входа в Google", Toast.LENGTH_SHORT).show()
             }
@@ -58,9 +69,9 @@ class LoginRegistration : AppCompatActivity() {
     private fun signInWithGoogle() {
         val signInIntent = googleSignInClient.signInIntent
         startActivityForResult(signInIntent, REQUEST_CODE_SIGN_IN)
-        val intent = Intent(this,  ActivityWithDrawerNavigation::class.java)
-        startActivity(intent)
-        finish()
+//        val intent = Intent(this,  ActivityWithDrawerNavigation::class.java)
+//        startActivity(intent)
+//        finish()
     }
 
     private fun requestPermission() {

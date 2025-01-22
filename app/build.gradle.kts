@@ -13,6 +13,7 @@ android {
         exclude ("META-INF/LICENSE.txt")
         exclude ("META-INF/NOTICE")
         exclude ("META-INF/NOTICE.txt")
+        exclude ("META-INF/*.kotlin_module")
     }
 
     defaultConfig {
@@ -57,7 +58,7 @@ dependencies {
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.navigation:navigation-ui-ktx:2.8.3")
     implementation("androidx.navigation:navigation-fragment-ktx:2.8.3")
-    implementation("androidx.legacy:legacy-support-v4:1.0.0")
+
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
@@ -80,6 +81,8 @@ dependencies {
     implementation ("com.google.android.gms:play-services-auth:20.6.0")
     implementation ("com.google.api-client:google-api-client-android:1.34.0")
     implementation ("com.google.api-client:google-api-client-gson:1.34.0")
+
+
 
 
 

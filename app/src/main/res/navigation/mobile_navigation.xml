@@ -50,7 +50,18 @@
     <action
         android:id="@+id/action_yourCurrentFragment_to_fragmentDetail"
         app:destination="@id/nav_detail_theatre" >
-
     </action>
+
+    <fragment
+        android:id = "@+id/nav_scanQR"
+        android:name = "com.example.foractorwithrepetition.ui.scanQR.ScanQRFragment"
+        android:label="@string/qr_blank"
+        tools:layout="@layout/fragment_scan_q_r">
+    </fragment>
+    <action
+        android:id="@+id/action_qrCodeFragment_to_ScanQRFragment"
+        app:destination="@id/nav_scanQR" >
+    </action>
+
 
 </navigation>
