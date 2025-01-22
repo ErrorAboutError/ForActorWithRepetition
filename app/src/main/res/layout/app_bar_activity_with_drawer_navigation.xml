@@ -5,9 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ActivityWithDrawerNavigation">
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -26,5 +24,5 @@
 
             <include layout="@layout/content_activity_with_drawer_navigation" />
         </LinearLayout>
-    </ScrollView>
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

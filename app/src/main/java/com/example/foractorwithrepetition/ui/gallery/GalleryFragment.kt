@@ -34,10 +34,6 @@ class GalleryFragment : Fragment() {
         _binding = FragmentGalleryBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-//        val textView: TextView = binding.textGallery
-//        galleryViewModel.text.observe(viewLifecycleOwner) {
-//            textView.text = it
-//        }
         return root
     }
 
@@ -54,11 +50,13 @@ class GalleryFragment : Fragment() {
         super.onResume()
         // Загрузка Rehearsal
         rehearsalViewModel.getAllRehearsals().observe(viewLifecycleOwner) { rehearsals ->
+            // Создание адаптера
             val rehearsalAdapter = RehearsalAdapter(rehearsals.toMutableList())
             rehearsalAdapter.updateRehearsals(rehearsals)
             _binding!!.rehearsalList.adapter = rehearsalAdapter
+            // Передача доступа к БД
             rehearsalAdapter.rehearsalViewModel = this.rehearsalViewModel
-            Log.i("update", "!!!")
+            // Настройка внешнего вида списка
             _binding!!.rehearsalList.layoutManager = LinearLayoutManager(this.context)
         }
     }

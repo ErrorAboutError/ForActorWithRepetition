@@ -33,15 +33,20 @@ class RehearsalAdapter(private var rehearsals: MutableList<Rehearsal>) : Recycle
 
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     override fun onBindViewHolder(holder: RehearsalViewHolder, position: Int) {
+        // Заолнение название оповещение
         holder.title.text = rehearsals[position].name
+        // Заполнение времени оповещения
         holder.time.text = rehearsals[position].time
+        // Включение активных оповещений
         if(rehearsals[position].activated)
             holder.switcher.setChecked(true)
+        // Заполнение даты оповещения
         holder.date.text = rehearsals[position].date
+        // Обработка нажатия на переключатель
         holder.switcher.setOnClickListener{
             val alManager = holder.itemView.context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             if(!holder.switcher.isChecked) {
-
+                // Отмена включённого уведомления
                 val myIntent = Intent(
                     getApplicationContext(),
                     AlarmReceiver::class.java
@@ -49,11 +54,11 @@ class RehearsalAdapter(private var rehearsals: MutableList<Rehearsal>) : Recycle
                 val pendingIntent = PendingIntent.getBroadcast(
                     getApplicationContext(), rehearsals[position].id.toInt(), myIntent, PendingIntent.FLAG_IMMUTABLE
                 )
-
                 alManager.cancel(pendingIntent)
                 rehearsals[position].activated = false
             }
             else {
+                // Создание уведомления
                 rehearsals[position].activated = true
                 val alarmIntent = Intent(holder.itemView.context, AlarmReceiver::class.java).apply {
                     putExtra("rehearsal_name", rehearsals[position].name)
@@ -66,24 +71,10 @@ class RehearsalAdapter(private var rehearsals: MutableList<Rehearsal>) : Recycle
                     alarmIntent
                 )
             }
+            // Сохранение изменеий в БД
             rehearsalViewModel.updateActivation(position.toLong(), rehearsals[position].activated )
         }
     }
-
-//    private fun turnOnOthers(holder: RehearsalAdapter.RehearsalViewHolder) {
-//        Log.i("name", "Activeted")
-//        val alManager = holder.itemView.context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-//        for (position in 0..this.getItemCount()){
-//            val alarmIntent = Intent(holder.itemView.context, AlarmReceiver::class.java).apply {
-//                putExtra("rehearsal_name", rehearsals[position].name)
-//            }.let {
-//                PendingIntent.getBroadcast(holder.itemView.context, System.currentTimeMillis().toInt(), it, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE )
-//            }
-//            alManager.setExact(AlarmManager.RTC_WAKEUP, rehearsals[position].timeInMiles, alarmIntent)
-//        }
-//
-//    }
-
 
     override fun getItemCount(): Int {
         return rehearsals.size
