@@ -24,7 +24,7 @@
             android:layout_height="wrap_content"
             android:text="Создать">
         </Button>
-        <Button android:id="@+id/generateQR"
+        <Button android:id="@+id/scanQR"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Скан">

@@ -24,6 +24,12 @@ class LoginRegistration : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login_registration)
+        val lastInGoogle = GoogleSignIn.getLastSignedInAccount(this)
+        if(lastInGoogle!=null){
+            val intent = Intent(this, ActivityWithDrawerNavigation::class.java)
+            startActivity(intent)
+            finish()
+        }
         // Настройка авторизации Google
         setupGoogleSignIn()
 
@@ -41,6 +47,10 @@ class LoginRegistration : AppCompatActivity() {
             if (task.isSuccessful) {
                 val account: GoogleSignInAccount? = task.result
                 Toast.makeText(this, "Авторизация успешна!", Toast.LENGTH_SHORT).show()
+                // Переход на новую активность после успешного входа
+                val intent = Intent(this, ActivityWithDrawerNavigation::class.java)
+                startActivity(intent)
+                finish()
             } else {
                 Toast.makeText(this, "Ошибка входа в Google", Toast.LENGTH_SHORT).show()
             }

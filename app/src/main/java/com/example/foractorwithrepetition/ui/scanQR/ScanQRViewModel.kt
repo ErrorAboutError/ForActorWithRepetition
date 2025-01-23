@@ -1,4 +1,4 @@
-package com.example.foractorwithrepetition
+package com.example.foractorwithrepetition.ui.scanQR
 
 import androidx.lifecycle.ViewModel
 

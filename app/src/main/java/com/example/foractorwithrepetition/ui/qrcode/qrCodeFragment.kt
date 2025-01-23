@@ -30,6 +30,10 @@ class qrCodeFragment: Fragment() {
         binding.createQR.setOnClickListener() {
             findNavController().navigate(R.id.action_qrCodeFragment_to_createQRFragment)
         }
+        // Переход к полю сканирования QR кода
+        binding.scanQR.setOnClickListener() {
+            findNavController().navigate(R.id.action_qrCodeFragment_to_ScanQRFragment)
+        }
         return root
     }
 

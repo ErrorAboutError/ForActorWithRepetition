@@ -1,21 +1,27 @@
 package com.example.foractorwithrepetition.ui.createQR
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Rect
+import android.net.Uri
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
+import android.os.Environment
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.FileProvider
 import com.example.foractorwithrepetition.R
 import com.example.foractorwithrepetition.databinding.FragmentCreateQRBinding
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
+import java.io.File
+import java.io.FileOutputStream
 import java.util.EnumMap
 
 class CreateQRFragment : Fragment() {
@@ -80,7 +86,45 @@ class CreateQRFragment : Fragment() {
             canvas.drawBitmap(logoBitmap, Rect(0,0,logoBitmap.width, logoBitmap.height), Rect(logoX, logoY, logoX+logoWidth, logoY+logoHeight), null)
             binding.imageView2.setImageBitmap(combinedBitmap)
             binding.imageView2.visibility = View.VISIBLE
+
+            // Добавление кнопки для отправки QR-кода
+            binding.buttonShare.visibility = View.VISIBLE
+            binding.buttonShare.setOnClickListener {
+                shareQRCode(combinedBitmap)
+            }
         }catch(e: Exception) {
+            e.printStackTrace()
+        }
+    }
+    private fun shareQRCode(bitmap: Bitmap) {
+        try {
+            // Сохранение Bitmap в файл
+            val file = File(
+                requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES),
+                "shared_qr_code.png"
+            )
+            val outputStream = FileOutputStream(file)
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+            outputStream.flush()
+            outputStream.close()
+
+            // Получение URI через FileProvider
+            val uri: Uri = FileProvider.getUriForFile(
+                requireContext(),
+                "${requireContext().packageName}.fileprovider",
+                file
+            )
+
+            // Создание Intent для обмена
+            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "image/*"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+
+            // Запуск Intent
+            startActivity(Intent.createChooser(shareIntent, "Поделиться QR-кодом"))
+        } catch (e: Exception) {
             e.printStackTrace()
         }
     }
