@@ -1,6 +1,5 @@
 package com.example.foractorwithrepetition.ui.qrcode
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,7 +7,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.foractorwithrepetition.R
-import com.example.foractorwithrepetition.ui.createQR.CreateQRFragment
 import com.example.foractorwithrepetition.databinding.FragmentQrBinding
 
 class qrCodeFragment: Fragment() {

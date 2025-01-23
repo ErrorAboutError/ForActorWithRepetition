@@ -28,16 +28,10 @@ import com.example.foractorwithrepetition.databinding.FragmentSlideshowBinding
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.BoundingBox
 import com.yandex.mapkit.geometry.Geometry
-import com.yandex.mapkit.geometry.Point
-import com.yandex.mapkit.map.VisibleRegion
-import com.yandex.mapkit.map.VisibleRegionUtils
-import com.yandex.mapkit.search.BusinessObjectMetadata
 import com.yandex.mapkit.search.SearchFactory
 import com.yandex.mapkit.search.SearchManagerType
 import com.yandex.mapkit.search.SearchOptions
 import com.yandex.mapkit.search.SearchType
-
-
 import com.yandex.mapkit.search.SearchManager
 import com.yandex.mapkit.search.Session
 import com.yandex.mapkit.search.Response
