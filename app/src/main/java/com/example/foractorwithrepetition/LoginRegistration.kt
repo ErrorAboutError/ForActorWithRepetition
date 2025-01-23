@@ -69,9 +69,9 @@ class LoginRegistration : AppCompatActivity() {
     private fun signInWithGoogle() {
         val signInIntent = googleSignInClient.signInIntent
         startActivityForResult(signInIntent, REQUEST_CODE_SIGN_IN)
-//        val intent = Intent(this,  ActivityWithDrawerNavigation::class.java)
-//        startActivity(intent)
-//        finish()
+        val intent = Intent(this,  ActivityWithDrawerNavigation::class.java)
+        startActivity(intent)
+        finish()
     }
 
     private fun requestPermission() {

@@ -5,19 +5,19 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.scanQR.ScanQRFragment">
-    <Button
-        android:id="@+id/bScan"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Scanner"
-        app:layout_constraintBottom_toTopOf="@+id/button"
-        app:layout_constraintEnd_toEndOf="@+id/button"
-        app:layout_constraintStart_toStartOf="@+id/button" />
     <com.journeyapps.barcodescanner.DecoratedBarcodeView
         android:id="@+id/barcode_scanner"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center" />
+
+    <Button
+        android:id="@+id/bScan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Scan"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="16dp" />
 
 
 
