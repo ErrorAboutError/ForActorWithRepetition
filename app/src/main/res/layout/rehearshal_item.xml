@@ -6,7 +6,7 @@
     android:padding="16dp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/black"
+    android:backgroundTint="#333333"
     app:cardCornerRadius="10dp"
     app:strokeColor="@color/black"
     app:cardElevation="10dp"
@@ -16,6 +16,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="5dp"
         android:orientation="horizontal"
         android:background="#333333">
 
@@ -50,10 +51,10 @@
         <LinearLayout
             android:layout_width="1dp"
             android:layout_weight="20"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent">
             <TextView
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:id="@+id/placeText"
                 android:textSize="15sp"
                 android:text="г. Санкт-Петербург, ул. Большая Морская д. 89. лит. А"

@@ -1,6 +1,7 @@
 package com.example.foractorwithrepetition
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
@@ -30,11 +31,22 @@ class RehearsalViewModel(application: Application) : AndroidViewModel(applicatio
             rehearsalDao.update(id, activated)
         }
     }
+
     // Добавление оповещения
     // rehearsal - новое оповещение
     fun insert(rehearsal: Rehearsal) {
         viewModelScope.launch {
             rehearsalDao.insert(rehearsal)
+        }
+    }
+
+    // Изменение оповещения
+    // rehearsal - изменённое оповещение
+    fun updateRehearsal(rehearsal: Rehearsal){
+        Log.i("new", rehearsal.toString())
+        viewModelScope.launch {
+            rehearsalDao.updateRehearsal(rehearsal)
+            Log.i("new", rehearsal.toString())
         }
     }
 }

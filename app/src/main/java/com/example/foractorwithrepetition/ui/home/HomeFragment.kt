@@ -41,7 +41,7 @@ import java.util.Locale
 
 class HomeFragment : Fragment() {
 
-    private var _binding: FragmentHomeBinding? = null
+
     private val CHANNEL_ID = "channelid"
     private val SCHEDULE_EXACT_ALARM_PERMISSION_REQUEST_CODE = 1
     private lateinit var alarmManager: AlarmManager
@@ -53,10 +53,45 @@ class HomeFragment : Fragment() {
 
     var code = 0
     private val SMOOTH_ANIMATION = Animation(Animation.Type.SMOOTH, 0.4f)
+    private lateinit var binding: FragmentHomeBinding
 
-    private val binding get() = _binding!!
-    //val binding = FragmentHomeBinding.inflate(inflater, container, false)
+    companion object{
+       var changingRehearsal: Rehearsal? = null
+    }
 
+    fun fillData(rehearsal: Rehearsal){
+        binding.timePicker.hour = rehearsal.time.split(":")[0].toInt()
+        binding.timePicker.minute = rehearsal.time.split(":")[1].toInt()
+        binding.coordinate.text.append(rehearsal.placeName)
+        binding.rehearsalDate.text.append(rehearsal.date)
+        binding.rehearsalName.text.append(rehearsal.name)
+        binding.addButton.text = "Изменить"
+        Log.i("fill", "Data")
+        selectedCoordinate = rehearsal.location
+        binding.addButton.setOnClickListener {
+            val calendar = Calendar.getInstance().apply {
+                // Создание точного времени оповещения
+                val dateParts = binding.rehearsalDate.text.toString().split("/")
+                if (dateParts.size == 3) {
+                    set(Calendar.YEAR, dateParts[2].toInt())
+                    set(Calendar.MONTH, dateParts[1].toInt() - 1)
+                    set(Calendar.DAY_OF_MONTH, dateParts[0].toInt())
+                    set(Calendar.HOUR_OF_DAY, binding.timePicker.hour)
+                    set(Calendar.MINUTE, binding.timePicker.minute)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                    if (timeInMillis < System.currentTimeMillis()) {
+                        add(Calendar.DAY_OF_YEAR, 1)
+                    }
+                }
+            }
+            Log.i("click", "click")
+            rehearsalViewModel.updateRehearsal(Rehearsal(id = changingRehearsal!!.id,name = binding.rehearsalName.text.toString(), time = "${binding.timePicker.hour}:${binding.timePicker.minute}",
+                date = "${binding.rehearsalDate.text}", timeInMiles = calendar.timeInMillis, activated = changingRehearsal!!.activated,
+                location = selectedCoordinate, placeName = binding.coordinate.text.toString()))
+            requireActivity().onBackPressed()
+        }
+    }
     // Обработка нажатия на объект на карте
     private val geoObjectTapListener = GeoObjectTapListener {
         val point = it.geoObject.geometry.firstOrNull()?.point ?: return@GeoObjectTapListener true
@@ -101,14 +136,13 @@ class HomeFragment : Fragment() {
     ): View {
 
         // Инициализация binding
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        binding = FragmentHomeBinding.inflate(inflater, container, false)
         createNotificationChannel() //Создание канала отправки уведомления
         val root: View = binding.root
         binding.timePicker.setIs24HourView(true)
         binding.rehearsalDate.setOnClickListener { showDatePickerDialog() }
         alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
         rehearsalViewModel = ViewModelProvider(this).get(RehearsalViewModel::class.java)
-
         binding.addButton.setOnClickListener { onAddButtonClicked() }
         rehearsalViewModel.getAllRehearsals().observe(viewLifecycleOwner) { rehearsals ->
             rehearsalAdapter = RehearsalAdapter(rehearsals.toMutableList())
@@ -119,6 +153,8 @@ class HomeFragment : Fragment() {
 
         mapWindow = binding.mapview.mapWindow
         binding.mapview.map.addTapListener(geoObjectTapListener)
+        if(changingRehearsal != null)
+            fillData(changingRehearsal!!)
         return root
     }
 
@@ -263,8 +299,8 @@ class HomeFragment : Fragment() {
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    override fun onDestroy() {
+        super.onDestroy()
+        changingRehearsal = null
     }
 }

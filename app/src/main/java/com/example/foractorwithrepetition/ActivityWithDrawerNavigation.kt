@@ -61,7 +61,6 @@ class ActivityWithDrawerNavigation : AppCompatActivity() {
         }
     }
 
-
 override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
     super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     when (requestCode) {
@@ -131,9 +130,6 @@ private fun canScheduleExactAlarms(): Boolean {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
-
-
-
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
