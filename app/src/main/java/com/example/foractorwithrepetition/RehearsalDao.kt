@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 
 // Интерфейс для доступа к БД
 @Dao
@@ -26,4 +27,7 @@ interface RehearsalDao {
     // activate - новый статус оповещения
     @Query("UPDATE rehearsals SET activated = :activate WHERE id = :id + 1")
     suspend fun update(id: Long, activate: Boolean)
+
+    @Update
+    suspend fun updateRehearsal(rehearsal: Rehearsal)
 }

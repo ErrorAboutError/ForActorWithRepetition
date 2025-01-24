@@ -12,6 +12,7 @@ import android.widget.Switch
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
+import com.example.foractorwithrepetition.ui.gallery.GalleryFragment
 import com.yandex.runtime.Runtime.getApplicationContext
 
 
@@ -44,6 +45,9 @@ class RehearsalAdapter(private var rehearsals: MutableList<Rehearsal>) : Recycle
         holder.place.text = rehearsals[position].placeName
         // Заполнение даты оповещения
         holder.date.text = rehearsals[position].date
+        holder.itemView.setOnClickListener {
+            GalleryFragment.goToChangeRehearsal(rehearsals[position])
+        }
         // Обработка нажатия на переключатель
         holder.switcher.setOnClickListener{
             val alManager = holder.itemView.context.getSystemService(Context.ALARM_SERVICE) as AlarmManager

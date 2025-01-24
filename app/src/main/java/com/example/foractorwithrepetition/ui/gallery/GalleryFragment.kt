@@ -7,10 +7,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.foractorwithrepetition.R
+import com.example.foractorwithrepetition.Rehearsal
 import com.example.foractorwithrepetition.RehearsalAdapter
 import com.example.foractorwithrepetition.RehearsalViewModel
 import com.example.foractorwithrepetition.databinding.FragmentGalleryBinding
+import com.example.foractorwithrepetition.ui.home.HomeFragment
 
 class GalleryFragment : Fragment() {
 
@@ -29,6 +34,10 @@ class GalleryFragment : Fragment() {
             ViewModelProvider(this).get(GalleryViewModel::class.java)
         rehearsalViewModel = ViewModelProvider(this).get(RehearsalViewModel::class.java)
         _binding = FragmentGalleryBinding.inflate(inflater, container, false)
+        _binding!!.addPehearsalButton.setOnClickListener {
+            addRehearsalButtonClick()
+        }
+        navControler = findNavController()
         val root: View = binding.root
 
         return root
@@ -39,8 +48,8 @@ class GalleryFragment : Fragment() {
         _binding = null
     }
 
-    fun addRehearsalButtonClick(view: View){
-        // Добавить переход на HomeFragment
+    fun addRehearsalButtonClick(){
+        navControler.navigate(R.id.nav_home)
     }
 
     override fun onResume() {
@@ -55,6 +64,14 @@ class GalleryFragment : Fragment() {
             rehearsalAdapter.rehearsalViewModel = this.rehearsalViewModel
             // Настройка внешнего вида списка
             _binding!!.rehearsalList.layoutManager = LinearLayoutManager(this.context)
+        }
+    }
+
+    companion object{
+        lateinit var navControler: NavController
+        fun goToChangeRehearsal(rehearsal: Rehearsal){
+            navControler.navigate(R.id.nav_home)
+            HomeFragment.changingRehearsal = rehearsal
         }
     }
 }
