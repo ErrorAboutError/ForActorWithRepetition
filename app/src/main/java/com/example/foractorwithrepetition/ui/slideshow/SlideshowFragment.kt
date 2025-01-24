@@ -7,6 +7,7 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Bundle
 import android.speech.RecognizerIntent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -28,6 +29,7 @@ import com.example.foractorwithrepetition.databinding.FragmentSlideshowBinding
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.BoundingBox
 import com.yandex.mapkit.geometry.Geometry
+import com.yandex.mapkit.search.BusinessObjectMetadata
 import com.yandex.mapkit.search.SearchFactory
 import com.yandex.mapkit.search.SearchManagerType
 import com.yandex.mapkit.search.SearchOptions
@@ -134,10 +136,10 @@ class SlideshowFragment : Fragment(), AdapterDataTheatreClass.OnItemClickListene
         val gridLayoutManager = GridLayoutManager(requireContext(), 1)
         binding.recyclerView.layoutManager = gridLayoutManager
        dataList.apply{
-           add(DataThearteClass("Театр Таро", "улица Гороховая, 51", "Открыто до 01:00", R.drawable.threatrelist))
-           add(DataThearteClass("Кинотеатр Лицедей", "улица Гороховая, 51", "Открыто до 23:00", R.drawable.streethaus))
-           add(DataThearteClass("Отдыхающая уточка", "улица Гороховая, 51", "Открыто до 22:00", R.drawable.theareslider))
-           add(DataThearteClass("Клоун-мим театр \"Фантазия кончилась\"", "улица Гороховая, 51", "Открыто до 02:00", R.drawable.theatreyandex))
+           add(DataThearteClass("Театр Таро", "улица Гороховая, 51", "Открыто до 01:00", R.drawable.threatrelist, ""))
+           add(DataThearteClass("Кинотеатр Лицедей", "улица Гороховая, 51", "Открыто до 23:00", R.drawable.streethaus, ""))
+           add(DataThearteClass("Отдыхающая уточка", "улица Гороховая, 51", "Открыто до 22:00", R.drawable.theareslider, ""))
+           add(DataThearteClass("Клоун-мим театр \"Фантазия кончилась\"", "улица Гороховая, 51", "Открыто до 02:00", R.drawable.theatreyandex, ""))
            //add(DataThearteClass("Rating Bar", R.string.rating, "Java", R.drawable.date_detail))
        }
         adapter = AdapterDataTheatreClass(requireContext(), dataList, this)
@@ -179,8 +181,9 @@ class SlideshowFragment : Fragment(), AdapterDataTheatreClass.OnItemClickListene
 
         val bundle = Bundle().apply {
             putInt("Image", item.getDataImage())
-            putString("Title", item.getDataTitle().toString())
-            putString("Desc", item.getDataDesc().toString())
+            putString("Title", item.getDataTitle())
+            putString("Desc", item.getDataDesc())
+            putString("Uri", item.getDataUri())
         }
         findNavController().navigate(R.id.action_yourCurrentFragment_to_fragmentDetail, bundle)
     }
@@ -241,15 +244,29 @@ class SlideshowFragment : Fragment(), AdapterDataTheatreClass.OnItemClickListene
             object : Session.SearchListener {
                 override fun onSearchResponse(response: Response) {
                     val theaters = response.collection.children.mapNotNull { item ->
-                        item.obj?.let {
+                        item.obj?.let {obj->
+                            val metadata = obj.metadataContainer?.toString() ?: "No metadata"
+                            Log.d("Metadata", metadata) // Логируем метаданные объекта
+
+//                            val websiteUrl = obj.metadataContainer
+//                                ?.getItem(BusinessObjectMetadata::class.java)
+//                                ?.let { metadata ->
+//                                    metadata.links // Используйте подходящее поле
+//                                } ?: "No URL"
+
+                            val websiteUrls = obj.metadataContainer
+                                ?.getItem(BusinessObjectMetadata::class.java)
+                                ?.links // Получаем список ссылок
+                                ?.mapNotNull { link ->
+                                    link.link.href // Извлекаем URI из каждого объекта `SearchLink`
+                                } ?: emptyList()
+
                             DataThearteClass(
-                                it.name.toString(),
-                               // it.descriptionText.toString(),
-                                //it.metadataContainer.toString(),
-                                it.descriptionText.toString(),
-                                it.descriptionText.toString(),
-                                //it.geometry.first().point.toString(),
-                                R.drawable.spbadd  // Статичное изображение
+                                obj.name.toString(),
+                                obj.descriptionText.toString(),
+                                obj.descriptionText.toString(),
+                                R.drawable.spbadd,  // Статичное изображение,
+                                websiteUrls.joinToString(",")
                             )
                         }
                     }

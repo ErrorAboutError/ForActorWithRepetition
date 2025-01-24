@@ -40,15 +40,30 @@
         android:textSize="18sp"
        />
 
-    <Button
+    <TextView
         android:id="@+id/button"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Афиша"
-
+        android:layout_height="40dp"
+        android:text="Ссылки"
+        android:gravity="center"
+        android:background="@color/darkBlue"
         android:textSize="20sp"
-        android:textStyle="normal"
+        android:textStyle="bold"
+        android:textColor="@color/white"
         app:cornerRadius="0dp" />
+    <TextView
+        android:id="@+id/linkText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="Link"
+        android:padding="20dp"
+        android:autoLink="web"
+        android:lineSpacingExtra="4dp"
+        android:layout_gravity="center"
+        android:textColor="@color/violet"
+        android:textSize="18sp"
+        />
 
 
 </LinearLayout>

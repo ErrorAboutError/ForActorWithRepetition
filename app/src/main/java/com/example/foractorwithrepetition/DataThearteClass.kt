@@ -4,7 +4,8 @@ class DataThearteClass(
     private var dataTitle: String,
     private var dataDesc: String,
     private var dataLang: String,
-    private var dataImage: Int
+    private var dataImage: Int,
+    private var dataUri: String
     //val imageUrl: String?  // URL-адрес изображения
 ) {
     fun getDataTitle(): String {
@@ -21,6 +22,10 @@ class DataThearteClass(
 
     fun getDataImage(): Int {
         return dataImage
+    }
+
+    fun getDataUri(): String{
+        return dataUri
     }
 //    fun getImageUrl(): String?{
 //        return imageUrl
