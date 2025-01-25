@@ -40,6 +40,12 @@ class RehearsalViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
+    fun delete(rehearsal: Rehearsal){
+        viewModelScope.launch {
+            rehearsalDao.delete(rehearsal)
+        }
+    }
+
     // Изменение оповещения
     // rehearsal - изменённое оповещение
     fun updateRehearsal(rehearsal: Rehearsal){
