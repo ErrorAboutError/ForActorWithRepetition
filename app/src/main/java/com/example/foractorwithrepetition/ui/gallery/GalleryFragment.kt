@@ -38,6 +38,7 @@ class GalleryFragment : Fragment() {
             addRehearsalButtonClick()
         }
         navControler = findNavController()
+
         val root: View = binding.root
 
         return root

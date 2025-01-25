@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
+<androidx.cardview.widget.CardView
+
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -12,13 +13,14 @@
     app:cardElevation="10dp"
     android:layout_margin="5dp">
 
+
     <!-- Root LinearLayout to arrange elements horizontally -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
         android:orientation="horizontal"
-        android:background="#333333">
+       >
 
         <!-- First LinearLayout for title and time -->
 
@@ -61,7 +63,7 @@
                 android:textColor="#DDDDDD"
                 android:fontFamily="sans-serif"
                 android:gravity="center"
-                android:layout_marginLeft="10dp">
+                >
 
             </TextView>
         </LinearLayout>
@@ -93,4 +95,4 @@
                 tools:ignore="UseSwitchCompatOrMaterialXml" />
         </LinearLayout>
     </LinearLayout>
-</com.google.android.material.card.MaterialCardView>
+</androidx.cardview.widget.CardView>

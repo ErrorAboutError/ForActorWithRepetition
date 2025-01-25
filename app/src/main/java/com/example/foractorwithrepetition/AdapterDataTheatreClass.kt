@@ -34,6 +34,12 @@ class AdapterDataTheatreClass(
         holder.recTitle?.text = currentItem.getDataTitle()
         holder.recDesc?.text = currentItem.getDataDesc().toString()
         holder.recLang?.text = currentItem.getDataLang()
+        holder.itemView.alpha = 0f
+        holder.itemView.animate()
+            .alpha(1f)
+            .setDuration(500)
+            .setStartDelay((position * 100).toLong())
+            .start()
 //        // Загрузка изображения
 //        currentItem.imageUrl?.let { url ->
 //            Glide.with(holder.recImage?.context)

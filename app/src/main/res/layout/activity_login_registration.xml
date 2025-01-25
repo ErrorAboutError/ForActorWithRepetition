@@ -24,39 +24,52 @@
             android:background="@drawable/custom_edittext"
             android:backgroundTint="@color/white">
 
-            <TextView
-                android:layout_width="match_parent"
+
+                <TextView
+                    android:id="@+id/hi_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Привет!"
+                    android:textSize="36sp"
+                    android:textAlignment="center"
+                    android:textStyle="bold"
+                    android:textColor="@color/darkBlue"/>
+
+                <View
+                    android:id="@+id/sepa"
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:background="@color/darkBlue"
+                    android:layout_marginTop="5dp"
+                    android:shadowColor="@color/black"
+                    android:shadowRadius="4"
+                    android:shadowDx="2"
+                    android:shadowDy="2"
+                    android:layout_marginBottom="10dp">
+                </View>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Привет!"
-                android:textSize="36sp"
-                android:textAlignment="center"
-                android:textStyle="bold"
-                android:textColor="@color/darkBlue"/>
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:background="@color/darkBlue"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp">
-            </View>
-
-            <ImageButton
-                android:layout_width="50dp"
-                android:layout_height="50dp"
                 android:layout_gravity="center"
-                android:background="@drawable/google_logo"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="@android:color/transparent">
 
-                android:id="@+id/signin_google"
-                app:iconGravity="textStart"
+                <ImageButton
+                    android:id="@+id/signin_google"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:background="@drawable/google_logo"
+                    app:iconGravity="textStart"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.13"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.707"
+                    tools:ignore="SpeakableTextPresentCheck"/>
+            </androidx.cardview.widget.CardView>
 
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.13"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.707"
-                tools:ignore="SpeakableTextPresentCheck"
-                />
 
         </LinearLayout>
 

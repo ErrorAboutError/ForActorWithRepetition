@@ -4,11 +4,14 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.view.View
 import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.foractorwithrepetition.databinding.ActivityLoginRegistrationBinding
+import com.example.foractorwithrepetition.databinding.FragmentFragmentDetailBinding
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -20,10 +23,22 @@ class LoginRegistration : AppCompatActivity() {
     private lateinit var googleSignInClient: GoogleSignInClient
     private val REQUEST_CODE_PERMISSION = 1001
     private val REQUEST_CODE_SIGN_IN = 1000
+    private var _binding: ActivityLoginRegistrationBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login_registration)
+        _binding = ActivityLoginRegistrationBinding.inflate(layoutInflater)
+        val root: View = binding.root
+        setContentView(binding.root) // Используем разметку из binding
+
+        binding.hiText.alpha=0f
+        binding.signinGoogle.alpha=0f
+        binding.sepa.alpha=0f
+        binding.hiText.animate().alpha(1f).translationYBy((50).toFloat()).setStartDelay(300).duration=1500
+        binding.signinGoogle.animate().alpha(1f).translationYBy((-50).toFloat()).setStartDelay(300).duration=1500
+        binding.signinGoogle.animate().alpha(1f).translationYBy((0).toFloat()).setStartDelay(300).duration=1500
+
         val lastInGoogle = GoogleSignIn.getLastSignedInAccount(this)
         if(lastInGoogle!=null){
             val intent = Intent(this, ActivityWithDrawerNavigation::class.java)
@@ -38,6 +53,8 @@ class LoginRegistration : AppCompatActivity() {
         googleSignInButton.setOnClickListener {
             signInWithGoogle()
         }
+
+      //return root
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -69,9 +86,9 @@ class LoginRegistration : AppCompatActivity() {
     private fun signInWithGoogle() {
         val signInIntent = googleSignInClient.signInIntent
         startActivityForResult(signInIntent, REQUEST_CODE_SIGN_IN)
-        val intent = Intent(this,  ActivityWithDrawerNavigation::class.java)
-        startActivity(intent)
-        finish()
+//        val intent = Intent(this,  ActivityWithDrawerNavigation::class.java)
+//        startActivity(intent)
+//        finish()
     }
 
     private fun requestPermission() {

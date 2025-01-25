@@ -80,6 +80,13 @@ class RehearsalAdapter(private var rehearsals: MutableList<Rehearsal>) : Recycle
             // Сохранение изменеий в БД
             rehearsalViewModel.updateActivation(position.toLong(), rehearsals[position].activated )
         }
+        // Анимация появления
+        holder.itemView.alpha = 0f
+        holder.itemView.animate()
+            .alpha(1f)
+            .setDuration(500)
+            .setStartDelay((position * 100).toLong())
+            .start()
     }
 
     override fun getItemCount(): Int {
