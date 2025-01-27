@@ -315,8 +315,11 @@ class HomeFragment : Fragment() {
             putExtra(android.provider.CalendarContract.EXTRA_EVENT_END_TIME, calendar.timeInMillis + 60 * 60 * 1000) // 1 час
         }
 
-
-        startActivity(intent)
+        try {
+            startActivity(intent)
+        } catch (exception: Exception){
+            Toast.makeText(requireContext(), "Не удалось открыть календарь", Toast.LENGTH_LONG).show()
+        }
     }
 
     // Для карт
