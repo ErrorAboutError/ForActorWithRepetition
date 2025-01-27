@@ -144,7 +144,6 @@ class HomeFragment : Fragment() {
         )
 
         addresses!![0].getAddressLine(0)
-
         val city: String = addresses[0].locality
         val street: String = addresses[0].getAddressLine(0).split(",")[0]
         val country: String = addresses[0].countryName
@@ -165,12 +164,20 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
 
+
         // Инициализация binding
         binding = FragmentHomeBinding.inflate(inflater, container, false)
+        // Очистка полей
+
+        Log.i("Clear", binding.rehearsalName.text.toString())
+        binding.rehearsalName.text.clear()
+        binding.rehearsalDate.text.clear()
+        binding.coordinate.text.clear()
+        binding.deleteButton.visibility = View.GONE
+        binding.addButton.text = "Добавить"
         createNotificationChannel() //Создание канала отправки уведомления
         val root: View = binding.root
         binding.timePicker.setIs24HourView(true)
-        binding.deleteButton.visibility = View.GONE
         binding.rehearsalDate.setOnClickListener { showDatePickerDialog() }
         alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
         rehearsalViewModel = ViewModelProvider(this).get(RehearsalViewModel::class.java)
@@ -183,8 +190,7 @@ class HomeFragment : Fragment() {
         }
         mapWindow = binding.mapview.mapWindow
         binding.mapview.map.addTapListener(geoObjectTapListener)
-        if(changingRehearsal != null)
-            fillData(changingRehearsal!!)
+
         return root
     }
 
@@ -309,28 +315,44 @@ class HomeFragment : Fragment() {
             putExtra(android.provider.CalendarContract.EXTRA_EVENT_END_TIME, calendar.timeInMillis + 60 * 60 * 1000) // 1 час
         }
 
-        if (intent.resolveActivity(requireContext().packageManager) != null) {
+        try {
             startActivity(intent)
-        } else {
-            Toast.makeText(requireContext(), "Приложение Календарь не установлено", Toast.LENGTH_SHORT).show()
+        } catch (exception: Exception){
+            Toast.makeText(requireContext(), "Не удалось открыть календарь", Toast.LENGTH_LONG).show()
         }
     }
 
     // Для карт
     override fun onStart() {
         super.onStart()
+        if(changingRehearsal != null)
+            fillData(changingRehearsal!!)
+        else {
+            // Очистка полей
+            Log.i("Clear", binding.rehearsalName.text.toString())
+            binding.rehearsalName.text.clear()
+            binding.rehearsalDate.text.clear()
+            binding.coordinate.text.clear()
+            binding.deleteButton.visibility = View.GONE
+            binding.addButton.text = "Добавить"
+        }
         MapKitFactory.getInstance().onStart()
         binding.mapview.onStart()
+
     }
 
     override fun onStop() {
         binding.mapview.onStop()
         MapKitFactory.getInstance().onStop()
+        changingRehearsal = null
         super.onStop()
     }
+
+
     override fun onDestroy() {
         super.onDestroy()
         changingRehearsal = null
     }
+
 }
 
