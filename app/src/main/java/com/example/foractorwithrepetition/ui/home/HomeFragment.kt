@@ -315,11 +315,8 @@ class HomeFragment : Fragment() {
             putExtra(android.provider.CalendarContract.EXTRA_EVENT_END_TIME, calendar.timeInMillis + 60 * 60 * 1000) // 1 час
         }
 
-        if (intent.resolveActivity(requireContext().packageManager) != null) {
-            startActivity(intent)
-        } else {
-            Toast.makeText(requireContext(), "Приложение Календарь не установлено", Toast.LENGTH_SHORT).show()
-        }
+
+        startActivity(intent)
     }
 
     // Для карт
