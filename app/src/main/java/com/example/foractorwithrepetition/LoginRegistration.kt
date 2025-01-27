@@ -27,6 +27,7 @@ class LoginRegistration : AppCompatActivity() {
     private val binding get() = _binding!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(R.style.Theme_ForActorWithRepetition_NoActionBar)
         super.onCreate(savedInstanceState)
         _binding = ActivityLoginRegistrationBinding.inflate(layoutInflater)
         val root: View = binding.root
