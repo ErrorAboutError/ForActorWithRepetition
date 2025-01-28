@@ -39,6 +39,8 @@ import com.yandex.mapkit.map.Map
 import com.yandex.mapkit.map.MapWindow
 import com.yandex.mapkit.search.Address
 import com.yandex.runtime.Runtime
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Locale
 
@@ -76,7 +78,7 @@ class HomeFragment : Fragment() {
         // Изменение обработчика нажатия на кнопку
         binding.addButton.setOnClickListener {
             changeRehearsal()
-            requireActivity().onBackPressed()
+
         }
         // Вывод на экран кнопки Удалить
         binding.deleteButton.visibility = View.VISIBLE
@@ -102,10 +104,34 @@ class HomeFragment : Fragment() {
         // Создаем и показываем диалог
         val dialog = builder.create()
         dialog.show()
-
     }
 
     fun changeRehearsal(){
+        // Проверка на ввод данных
+        if (binding.rehearsalName.text.isEmpty() || binding.rehearsalDate.text.isEmpty() || binding.coordinate.text.isEmpty())
+            return
+        // Введённое время
+        val time = "${binding.timePicker.hour}" +
+                if(binding.timePicker.minute <= 9)
+                    ":0${binding.timePicker.minute}"
+                else
+                    ":${binding.timePicker.minute}"
+        // Получение текущих даты и времени
+        val formatterDate = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+        val currentDate = LocalDateTime.now().format(formatterDate)
+        val formatterTime = DateTimeFormatter.ofPattern("HH:mm")
+        val currentTime = LocalDateTime.now().format(formatterTime)
+        Log.i("date", currentDate)
+        Log.i("date2", binding.rehearsalDate.text.toString())
+        Log.i("time", currentTime)
+        Log.i("time2", time)
+        Log.i("time2", (time <= currentTime).toString())
+        // Проверка, что указана дата и время, находящиеся в будущем
+        if( (binding.rehearsalDate.text.toString() < currentDate ) || (binding.rehearsalDate.text.toString() == currentDate
+                    && time <= currentTime)){
+            Toast.makeText(requireContext(), "Необходимо ввести предстоящее событие", Toast.LENGTH_LONG).show()
+            return
+        }
         val calendar = Calendar.getInstance().apply {
             // Создание точного времени события
             val dateParts = binding.rehearsalDate.text.toString().split("/")
@@ -123,11 +149,6 @@ class HomeFragment : Fragment() {
             }
         }
         // Изменение события
-        val time = "${binding.timePicker.hour}" +
-        if(binding.timePicker.minute <= 9)
-            ":0${binding.timePicker.minute}"
-        else
-            ":${binding.timePicker.minute}"
         rehearsalViewModel.updateRehearsal(Rehearsal(id = changingRehearsal!!.id,name = binding.rehearsalName.text.toString(), time = time,
             date = "${binding.rehearsalDate.text}", timeInMiles = calendar.timeInMillis, activated = changingRehearsal!!.activated,
             location = selectedCoordinate, placeName = binding.coordinate.text.toString()))
@@ -152,6 +173,8 @@ class HomeFragment : Fragment() {
             calendar.timeInMillis,
             alarmIntent
         )
+        // Переход ко списку событий
+        requireActivity().onBackPressed()
     }
 
     // Обработка нажатия на объект на карте
@@ -175,7 +198,6 @@ class HomeFragment : Fragment() {
             point.longitude,
             1
         )
-
         addresses!![0].getAddressLine(0)
         val city: String = addresses[0].locality
         val street: String = addresses[0].getAddressLine(0).split(",")[0]
@@ -222,7 +244,6 @@ class HomeFragment : Fragment() {
         }
         mapWindow = binding.mapview.mapWindow
         binding.mapview.map.addTapListener(geoObjectTapListener)
-
         return root
     }
 
@@ -231,8 +252,24 @@ class HomeFragment : Fragment() {
         val name = binding.rehearsalName.text.toString()
         val date = binding.rehearsalDate.text.toString()
         val coordinate = binding.coordinate.text.toString()
+        // Получение текущего даты и времени
+        val formatterDate = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+        val currentDate = LocalDateTime.now().format(formatterDate)
+        val formatterTime = DateTimeFormatter.ofPattern("HH:mm")
+        val currentTime = LocalDateTime.now().format(formatterTime)
+        // Получение введённого времени
+        val time = "${binding.timePicker.hour}" +
+                if(binding.timePicker.minute <= 9)
+                    ":0${binding.timePicker.minute}"
+                else
+                    ":${binding.timePicker.minute}"
         // Проверка на заполнение полей
         if (name.isNotEmpty() && date.isNotEmpty() && coordinate.isNotEmpty()) {
+            if( (binding.rehearsalDate.text.toString() < currentDate ) || (binding.rehearsalDate.text.toString() == currentDate
+                        && time <= currentTime)){
+                Toast.makeText(requireContext(), "Необходимо ввести предстоящее событие", Toast.LENGTH_LONG).show()
+                return
+            }
             // Добавление оповещения
             setAlarm(name, coordinate, date)
         }else{
@@ -289,6 +326,7 @@ class HomeFragment : Fragment() {
     }
 
 
+    // Создание канала для оповещений
     private fun createNotificationChannel() {
         val channel = NotificationChannel(CHANNEL_ID, "Rehearsal Notifications", NotificationManager.IMPORTANCE_DEFAULT).apply {
             description = "Channel for rehearsal notifications"
@@ -303,7 +341,17 @@ class HomeFragment : Fragment() {
         val calendar = Calendar.getInstance()
         DatePickerDialog( requireContext(),
             { _: DatePicker?, year: Int, month: Int, day: Int ->
-                binding.rehearsalDate.setText("$day/${month + 1}/$year")
+                // Изменение введённой даты под определённый формат
+                val dateText =
+                    (if(day <= 9)
+                        "0$day/"
+                    else
+                        "$day/") +
+                            ( if(month < 9)
+                    "0${month + 1}/"
+                else
+                    "${month + 1}/") + year.toString()
+                binding.rehearsalDate.setText(dateText)
             }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)
         ).show()
     }
@@ -313,16 +361,13 @@ class HomeFragment : Fragment() {
         val builder = AlertDialog.Builder(requireContext())
         builder.setTitle("Добавить оповещение")
         builder.setMessage("Вы хотите добавить новое оповещение?")
-
         builder.setPositiveButton("Да") { dialog, which ->
             callback(true) // Пользователь нажал "Да"
         }
-
         builder.setNegativeButton("Нет") { dialog, which ->
             callback(false) // Пользователь нажал "Нет"
             dialog.dismiss() // Закрыть диалог
         }
-
         // Создаем и показываем диалог
         val dialog = builder.create()
         dialog.show()
@@ -354,7 +399,6 @@ class HomeFragment : Fragment() {
             putExtra(android.provider.CalendarContract.EXTRA_EVENT_BEGIN_TIME, calendar.timeInMillis)
             putExtra(android.provider.CalendarContract.EXTRA_EVENT_END_TIME, calendar.timeInMillis + 60 * 60 * 1000) // 1 час
         }
-
         // Открытие google календаря
         try {
             startActivity(intent)
@@ -380,7 +424,6 @@ class HomeFragment : Fragment() {
         }
         MapKitFactory.getInstance().onStart()
         binding.mapview.onStart()
-
     }
 
     override fun onStop() {
