@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,6 +19,9 @@ import com.yandex.runtime.Runtime.getApplicationContext
 
 // Адаптер для отображения репетиций
 class RehearsalAdapter(private var rehearsals: MutableList<Rehearsal>) : RecyclerView.Adapter<RehearsalAdapter.RehearsalViewHolder>() {
+
+
+    var counter = 0
     inner class RehearsalViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val title: TextView = itemView.findViewById(R.id.titleText)
         val time: TextView = itemView.findViewById(R.id.timeText)
@@ -39,8 +43,7 @@ class RehearsalAdapter(private var rehearsals: MutableList<Rehearsal>) : Recycle
         // Заполнение времени оповещения
         holder.time.text = rehearsals[position].time
         // Включение активных оповещений
-        if(rehearsals[position].activated)
-            holder.switcher.setChecked(true)
+        holder.switcher.setChecked(rehearsals[position].activated)
         // Заполнение местоположения репетиции
         holder.place.text = rehearsals[position].placeName
         // Заполнение даты оповещения
@@ -81,12 +84,17 @@ class RehearsalAdapter(private var rehearsals: MutableList<Rehearsal>) : Recycle
             rehearsalViewModel.updateActivation(position.toLong(), rehearsals[position].activated )
         }
         // Анимация появления
-        holder.itemView.alpha = 0f
-        holder.itemView.animate()
-            .alpha(1f)
-            .setDuration(500)
-            .setStartDelay((position * 100).toLong())
-            .start()
+        if(counter != 5) {
+            holder.itemView.alpha = 0f
+            Log.i("Animation", position.toString())
+            Log.i("Animation2", counter.toString())
+            counter = counter + 1
+            holder.itemView.animate()
+                .alpha(1f)
+                .setDuration(1000)
+                .setStartDelay((30 * position).toLong())
+                .start()
+        }
     }
 
     override fun getItemCount(): Int {
