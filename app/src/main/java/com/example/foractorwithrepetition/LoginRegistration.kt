@@ -35,10 +35,9 @@ class LoginRegistration : AppCompatActivity() {
 
         binding.hiText.alpha=0f
         binding.signinGoogle.alpha=0f
-        binding.sepa.alpha=0f
-        binding.hiText.animate().alpha(1f).translationYBy((50).toFloat()).setStartDelay(300).duration=1500
-        binding.signinGoogle.animate().alpha(1f).translationYBy((-50).toFloat()).setStartDelay(300).duration=1500
-        binding.signinGoogle.animate().alpha(1f).translationYBy((0).toFloat()).setStartDelay(300).duration=1500
+
+        binding.hiText.animate().alpha(1f).translationYBy((30).toFloat()).setStartDelay(300).duration=1500
+        binding.signinGoogle.animate().alpha(1f).translationYBy((-30).toFloat()).setStartDelay(300).duration=1500
 
         val lastInGoogle = GoogleSignIn.getLastSignedInAccount(this)
         if(lastInGoogle!=null){

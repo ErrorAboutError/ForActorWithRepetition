@@ -7,11 +7,11 @@
         <item
             android:id="@+id/nav_home"
             android:icon="@drawable/plus"
-            android:title="Новая репетиция" />
+            android:title="Новое событие" />
         <item
             android:id="@+id/nav_gallery"
             android:icon="@drawable/ic_menu_gallery"
-            android:title="Список репетиций" />
+            android:title="Список событий" />
         <item
             android:id="@+id/nav_slideshow"
             android:icon="@drawable/theatre"
