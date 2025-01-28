@@ -11,10 +11,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Switch
 import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
 import com.example.foractorwithrepetition.ui.gallery.GalleryFragment
 import com.yandex.runtime.Runtime.getApplicationContext
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 
 // Адаптер для отображения событий
@@ -38,10 +41,21 @@ class RehearsalAdapter(private var rehearsals: MutableList<Rehearsal>) : Recycle
 
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     override fun onBindViewHolder(holder: RehearsalViewHolder, position: Int) {
+        // Получение текущих даты и времени
+        val formatterDate = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+        val currentDate = LocalDateTime.now().format(formatterDate)
+        val formatterTime = DateTimeFormatter.ofPattern("HH:mm")
+        val currentTime = LocalDateTime.now().format(formatterTime)
+
         // Заолнение название события
         holder.title.text = rehearsals[position].name
         // Заполнение времени события
         holder.time.text = rehearsals[position].time
+        if( (rehearsals[position].date < currentDate ) || (rehearsals[position].date == currentDate
+                    && rehearsals[position].time <= currentTime)) {
+            rehearsalViewModel.updateActivation(position.toLong(), rehearsals[position].activated)
+            holder.switcher.setChecked(false)
+        } else
         // Включение активных событий
         holder.switcher.setChecked(rehearsals[position].activated)
         // Заполнение местоположения события
@@ -53,35 +67,54 @@ class RehearsalAdapter(private var rehearsals: MutableList<Rehearsal>) : Recycle
         }
         // Обработка нажатия на переключатель
         holder.switcher.setOnClickListener{
-            val alManager = holder.itemView.context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            if(!holder.switcher.isChecked) {
-                // Отмена включённого оповещения
-                val myIntent = Intent(
-                    getApplicationContext(),
-                    AlarmReceiver::class.java
-                )
-                val pendingIntent = PendingIntent.getBroadcast(
-                    getApplicationContext(), rehearsals[position].id.toInt(), myIntent, PendingIntent.FLAG_IMMUTABLE
-                )
-                alManager.cancel(pendingIntent)
-                rehearsals[position].activated = false
-            }
-            else {
-                // Создание оповещения
-                rehearsals[position].activated = true
-                val alarmIntent = Intent(holder.itemView.context, AlarmReceiver::class.java).apply {
-                    putExtra("rehearsal_name", rehearsals[position].name)
-                }.let {
-                    PendingIntent.getBroadcast(holder.itemView.context, rehearsals[position].id.toInt(), it, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE )
+            if( (rehearsals[position].date < currentDate ) || (rehearsals[position].date == currentDate
+                        && rehearsals[position].time <= currentTime)){
+                Log.i("No", "Not allowed")
+                Toast.makeText(getApplicationContext(), "Нельзя включать оповещение на уже прошедшее событие", Toast.LENGTH_LONG).show()
+                holder.switcher.setChecked(false)
+            } else {
+                val alManager =
+                    holder.itemView.context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                if (!holder.switcher.isChecked) {
+                    // Отмена включённого оповещения
+                    val myIntent = Intent(
+                        getApplicationContext(),
+                        AlarmReceiver::class.java
+                    )
+                    val pendingIntent = PendingIntent.getBroadcast(
+                        getApplicationContext(),
+                        rehearsals[position].id.toInt(),
+                        myIntent,
+                        PendingIntent.FLAG_IMMUTABLE
+                    )
+                    alManager.cancel(pendingIntent)
+                    rehearsals[position].activated = false
+                } else {
+                    // Создание оповещения
+                    rehearsals[position].activated = true
+                    val alarmIntent =
+                        Intent(holder.itemView.context, AlarmReceiver::class.java).apply {
+                            putExtra("rehearsal_name", rehearsals[position].name)
+                        }.let {
+                            PendingIntent.getBroadcast(
+                                holder.itemView.context,
+                                rehearsals[position].id.toInt(),
+                                it,
+                                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                            )
+                        }
+                    alManager.setExact(
+                        AlarmManager.RTC_WAKEUP,
+                        rehearsals[position].timeInMiles,
+                        alarmIntent
+                    )
                 }
-                alManager.setExact(
-                    AlarmManager.RTC_WAKEUP,
-                    rehearsals[position].timeInMiles,
-                    alarmIntent
+                // Сохранение изменеий в БД
+                rehearsalViewModel.updateActivation(
+                    position.toLong(),
+                    rehearsals[position].activated
                 )
             }
-            // Сохранение изменеий в БД
-            rehearsalViewModel.updateActivation(position.toLong(), rehearsals[position].activated )
         }
         // Анимация появления
         if(counter != 5) {
