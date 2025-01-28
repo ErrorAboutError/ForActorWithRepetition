@@ -201,14 +201,14 @@ class HomeFragment : Fragment() {
         val coordinate = binding.coordinate.text.toString()
 
         if (name.isNotEmpty() && date.isNotEmpty() && coordinate.isNotEmpty()) {
-            setAlarm(name, coordinate)
-            addEventToGoogleCalendar(name, date)
+            setAlarm(name, coordinate, date)
+
         }else{
             Toast.makeText(requireContext(), "Вы не заполнили все поля", Toast.LENGTH_LONG).show()
         }
     }
 
-    private fun setAlarm(name: String, coordinate: String) {
+    private fun setAlarm(name: String, coordinate: String, date: String) {
         showDialog{result->
             if (result) {
                 alarmManager = requireActivity().getSystemService(Context.ALARM_SERVICE) as AlarmManager
@@ -239,9 +239,15 @@ class HomeFragment : Fragment() {
 
                 // Добавление оповещения
                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, alarmIntent)
-                rehearsalViewModel.insert(Rehearsal(name = name, time = "${binding.timePicker.hour}:${binding.timePicker.minute}",
+                val time = "${binding.timePicker.hour}" +
+                if(binding.timePicker.minute <= 9)
+                    ":0${binding.timePicker.minute}"
+                else
+                    ":${binding.timePicker.minute}"
+                rehearsalViewModel.insert(Rehearsal(name = name, time = time,
                     date = "${binding.rehearsalDate.text}", timeInMiles = calendar.timeInMillis, activated = true,
                     location = selectedCoordinate, placeName = coordinate))
+                addEventToGoogleCalendar(name, date)
                 // Очистка полей
                 binding.rehearsalName.text.clear()
                 binding.rehearsalDate.text.clear()
