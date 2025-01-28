@@ -4,22 +4,23 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 
-// Класс для представления репетиций
+// Класс для представления событий
 @Entity(tableName = "rehearsals")
 data class Rehearsal (
     // Id оповещения
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    // Название оповещения
+    // Название события
     val name: String,
-    // Время оповещения
+    // Время события
     val time: String,
-    // Дата оповещения
+    // Дата события
     val date: String,
-    // Точное время оповещения
+    // Точное время события
     val timeInMiles: Long,
-    // Статус оповещения
+    // Статус события
     var activated: Boolean,
-    // Местоположение репитиции
+    // Местоположение события
     val location: String,
+    // Адрес события
     val placeName: String
 )

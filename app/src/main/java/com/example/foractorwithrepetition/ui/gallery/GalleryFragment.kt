@@ -22,7 +22,6 @@ class GalleryFragment : Fragment() {
     private var _binding: FragmentGalleryBinding? = null
     private lateinit var rehearsalViewModel: RehearsalViewModel
 
-
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -32,8 +31,10 @@ class GalleryFragment : Fragment() {
     ): View {
         val galleryViewModel =
             ViewModelProvider(this).get(GalleryViewModel::class.java)
+        // Получение данных из БД
         rehearsalViewModel = ViewModelProvider(this).get(RehearsalViewModel::class.java)
         _binding = FragmentGalleryBinding.inflate(inflater, container, false)
+        // Определение листенера нажатия на кнопку
         _binding!!.addPehearsalButton.setOnClickListener {
             addRehearsalButtonClick()
         }
@@ -49,6 +50,7 @@ class GalleryFragment : Fragment() {
         _binding = null
     }
 
+    // Переход на создание события
     fun addRehearsalButtonClick(){
         navControler.navigate(R.id.nav_home)
     }
@@ -70,6 +72,7 @@ class GalleryFragment : Fragment() {
 
     companion object{
         lateinit var navControler: NavController
+        // Переход на изменение события
         fun goToChangeRehearsal(rehearsal: Rehearsal){
             navControler.navigate(R.id.nav_home)
             HomeFragment.changingRehearsal = rehearsal

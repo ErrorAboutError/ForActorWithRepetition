@@ -17,7 +17,7 @@ import com.example.foractorwithrepetition.ui.gallery.GalleryFragment
 import com.yandex.runtime.Runtime.getApplicationContext
 
 
-// Адаптер для отображения репетиций
+// Адаптер для отображения событий
 class RehearsalAdapter(private var rehearsals: MutableList<Rehearsal>) : RecyclerView.Adapter<RehearsalAdapter.RehearsalViewHolder>() {
 
 
@@ -38,15 +38,15 @@ class RehearsalAdapter(private var rehearsals: MutableList<Rehearsal>) : Recycle
 
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     override fun onBindViewHolder(holder: RehearsalViewHolder, position: Int) {
-        // Заолнение название оповещение
+        // Заолнение название события
         holder.title.text = rehearsals[position].name
-        // Заполнение времени оповещения
+        // Заполнение времени события
         holder.time.text = rehearsals[position].time
-        // Включение активных оповещений
+        // Включение активных событий
         holder.switcher.setChecked(rehearsals[position].activated)
-        // Заполнение местоположения репетиции
+        // Заполнение местоположения события
         holder.place.text = rehearsals[position].placeName
-        // Заполнение даты оповещения
+        // Заполнение даты события
         holder.date.text = rehearsals[position].date
         holder.itemView.setOnClickListener {
             GalleryFragment.goToChangeRehearsal(rehearsals[position])
@@ -55,7 +55,7 @@ class RehearsalAdapter(private var rehearsals: MutableList<Rehearsal>) : Recycle
         holder.switcher.setOnClickListener{
             val alManager = holder.itemView.context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             if(!holder.switcher.isChecked) {
-                // Отмена включённого уведомления
+                // Отмена включённого оповещения
                 val myIntent = Intent(
                     getApplicationContext(),
                     AlarmReceiver::class.java
@@ -67,7 +67,7 @@ class RehearsalAdapter(private var rehearsals: MutableList<Rehearsal>) : Recycle
                 rehearsals[position].activated = false
             }
             else {
-                // Создание уведомления
+                // Создание оповещения
                 rehearsals[position].activated = true
                 val alarmIntent = Intent(holder.itemView.context, AlarmReceiver::class.java).apply {
                     putExtra("rehearsal_name", rehearsals[position].name)
@@ -97,10 +97,10 @@ class RehearsalAdapter(private var rehearsals: MutableList<Rehearsal>) : Recycle
         }
     }
 
-    override fun getItemCount(): Int {
-        return rehearsals.size
-    }
+    // Получение размера списка
+    override fun getItemCount() = rehearsals.size
 
+    // Обновление списка событий
     fun updateRehearsals(newRehearsals: List<Rehearsal>) {
         rehearsals.clear()
         rehearsals.addAll(newRehearsals)

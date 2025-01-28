@@ -35,28 +35,10 @@ class NotificationHelper(private val context: Context) {
 
     fun sendNotification(title: String, message: String, coordinate: String) {
         val notificationId = UUID.randomUUID().hashCode() // Генерация уникального ID
-        val intent = Intent(context, MainActivity::class.java) // Укажите нужный класс
-        val pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE )
-
-        // Добавление действий
-        val openActionIntent = Intent(context, ActivityWithDrawerNavigation::class.java)
-        val openPendingIntent = PendingIntent.getActivity(
-            context,
-            1,
-            openActionIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        val dismissActionIntent = Intent(context, ActivityWithDrawerNavigation::class.java)
-
-        val dismissPendingIntent = PendingIntent.getBroadcast(
-            context,
-            2,
-            dismissActionIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-
-        // Добавление карты в оповещение
+        // Добавление открытия карты в оповещение
         val map = Intent(Intent.ACTION_VIEW)
         map.setData(Uri.parse("geo:${coordinate }"))
+        Log.i("coordinate", coordinate)
         val mapPI = PendingIntent.getActivity(context, 0, map, PendingIntent.FLAG_IMMUTABLE)
         val action: NotificationCompat.Action = NotificationCompat.Action(
             com.example.foractorwithrepetition.R.drawable.theatre,
@@ -68,17 +50,8 @@ class NotificationHelper(private val context: Context) {
             .setContentTitle(title)
             .setContentText(message)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .addAction(android.R.drawable.ic_menu_view,
-                "Открыть",
-                openPendingIntent)
-            .addAction(
-                android.R.drawable.ic_menu_close_clear_cancel,
-                "Отменить",
-                dismissPendingIntent
-            )
             .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
             .setVibrate(longArrayOf(0, 500, 250, 500))
             .addAction(action)
