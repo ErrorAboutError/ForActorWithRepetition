@@ -38,6 +38,7 @@ import com.yandex.mapkit.map.InputListener
 import com.yandex.mapkit.map.Map
 import com.yandex.mapkit.map.MapWindow
 import com.yandex.mapkit.search.Address
+import com.yandex.runtime.Runtime
 import java.util.Calendar
 import java.util.Locale
 
@@ -62,6 +63,7 @@ class HomeFragment : Fragment() {
        var changingRehearsal: Rehearsal? = null
     }
 
+    // Заполнение данных
     fun fillData(rehearsal: Rehearsal){
         // Заполнение полей
         binding.timePicker.hour = rehearsal.time.split(":")[0].toInt()
@@ -78,11 +80,13 @@ class HomeFragment : Fragment() {
         }
         // Вывод на экран кнопки Удалить
         binding.deleteButton.visibility = View.VISIBLE
+        // Переопределение нажатия на кнопку Добавить
         binding.deleteButton.setOnClickListener {
             deleteButtonClick(rehearsal)
         }
     }
 
+    // Обработка нажатия на кнопку удалить
     fun deleteButtonClick(rehearsal: Rehearsal){
         val builder = AlertDialog.Builder(requireContext())
         builder.setTitle("Удаление")
@@ -103,7 +107,7 @@ class HomeFragment : Fragment() {
 
     fun changeRehearsal(){
         val calendar = Calendar.getInstance().apply {
-            // Создание точного времени оповещения
+            // Создание точного времени события
             val dateParts = binding.rehearsalDate.text.toString().split("/")
             if (dateParts.size == 3) {
                 set(Calendar.YEAR, dateParts[2].toInt())
@@ -118,25 +122,54 @@ class HomeFragment : Fragment() {
                 }
             }
         }
-        rehearsalViewModel.updateRehearsal(Rehearsal(id = changingRehearsal!!.id,name = binding.rehearsalName.text.toString(), time = "${binding.timePicker.hour}:${binding.timePicker.minute}",
+        // Изменение события
+        val time = "${binding.timePicker.hour}" +
+        if(binding.timePicker.minute <= 9)
+            ":0${binding.timePicker.minute}"
+        else
+            ":${binding.timePicker.minute}"
+        rehearsalViewModel.updateRehearsal(Rehearsal(id = changingRehearsal!!.id,name = binding.rehearsalName.text.toString(), time = time,
             date = "${binding.rehearsalDate.text}", timeInMiles = calendar.timeInMillis, activated = changingRehearsal!!.activated,
             location = selectedCoordinate, placeName = binding.coordinate.text.toString()))
+        // Отмена включённого оповещения
+        val myIntent = Intent(
+            Runtime.getApplicationContext(),
+            AlarmReceiver::class.java
+        )
+        val pendingIntent = PendingIntent.getBroadcast(
+            Runtime.getApplicationContext(), (changingRehearsal!!.id).toInt(), myIntent, PendingIntent.FLAG_IMMUTABLE
+        )
+        alarmManager.cancel(pendingIntent)
+        // Добавление изменённого
+        val alarmIntent = Intent(context, AlarmReceiver::class.java).apply {
+            putExtra("rehearsal_name", binding.rehearsalName.text.toString())
+            putExtra("coordinate", selectedCoordinate)
+        }.let {
+            PendingIntent.getBroadcast(context, (changingRehearsal!!.id).toInt(), it, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE )
+        }
+        alarmManager.setExact(
+            AlarmManager.RTC_WAKEUP,
+            calendar.timeInMillis,
+            alarmIntent
+        )
     }
 
     // Обработка нажатия на объект на карте
     private val geoObjectTapListener = GeoObjectTapListener {
         val point = it.geoObject.geometry.firstOrNull()?.point ?: return@GeoObjectTapListener true
+        // Переход камеры на объект на карте
         binding.mapview.map.cameraPosition.run {
             val position = CameraPosition(point, zoom, azimuth, tilt)
             binding.mapview.map.move(position, SMOOTH_ANIMATION, null)
         }
+        // Получение данных об объекте на карте
         val selectionMetadata =
             it.geoObject.metadataContainer.getItem(GeoObjectSelectionMetadata::class.java)
         binding.mapview.map.selectGeoObject(selectionMetadata)
         val geocoder: Geocoder
         val addresses: MutableList<android.location.Address>?
         geocoder = Geocoder(requireActivity(), Locale.getDefault())
-
+        // Получение адреса объекта на карте
         addresses = geocoder.getFromLocation(
             point.latitude,
             point.longitude,
@@ -149,6 +182,7 @@ class HomeFragment : Fragment() {
         val country: String = addresses[0].countryName
         val knownName: String = addresses[0].featureName
         Log.i("placement", "$country $city $street $knownName")
+        // Сохранение координат объекта
         selectedCoordinate = "${binding.mapview.map.cameraPosition.target.latitude}, ${binding.mapview.map.cameraPosition.target.longitude}"
         Log.i("placement", binding.mapview.map.cameraPosition.target.latitude.toString())
         Log.i("placement", binding.mapview.map.cameraPosition.target.longitude.toString())
@@ -163,25 +197,23 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
-
         // Инициализация binding
         binding = FragmentHomeBinding.inflate(inflater, container, false)
         // Очистка полей
-
         Log.i("Clear", binding.rehearsalName.text.toString())
         binding.rehearsalName.text.clear()
         binding.rehearsalDate.text.clear()
         binding.coordinate.text.clear()
         binding.deleteButton.visibility = View.GONE
         binding.addButton.text = "Добавить"
-        createNotificationChannel() //Создание канала отправки уведомления
+        createNotificationChannel() //Создание канала отправки оповещений
         val root: View = binding.root
         binding.timePicker.setIs24HourView(true)
         binding.rehearsalDate.setOnClickListener { showDatePickerDialog() }
         alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
         rehearsalViewModel = ViewModelProvider(this).get(RehearsalViewModel::class.java)
         binding.addButton.setOnClickListener { onAddButtonClicked() }
+        // Загрузка данных из БД
         rehearsalViewModel.getAllRehearsals().observe(viewLifecycleOwner) { rehearsals ->
             rehearsalAdapter = RehearsalAdapter(rehearsals.toMutableList())
             rehearsalAdapter.updateRehearsals(rehearsals)
@@ -199,10 +231,10 @@ class HomeFragment : Fragment() {
         val name = binding.rehearsalName.text.toString()
         val date = binding.rehearsalDate.text.toString()
         val coordinate = binding.coordinate.text.toString()
-
+        // Проверка на заполнение полей
         if (name.isNotEmpty() && date.isNotEmpty() && coordinate.isNotEmpty()) {
+            // Добавление оповещения
             setAlarm(name, coordinate, date)
-
         }else{
             Toast.makeText(requireContext(), "Вы не заполнили все поля", Toast.LENGTH_LONG).show()
         }
@@ -236,9 +268,9 @@ class HomeFragment : Fragment() {
                 }.let {
                     PendingIntent.getBroadcast(requireContext(), code++, it, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE )
                 }
-
                 // Добавление оповещения
                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, alarmIntent)
+                // Время с добавлением 0 в случае однозначного количества минут
                 val time = "${binding.timePicker.hour}" +
                 if(binding.timePicker.minute <= 9)
                     ":0${binding.timePicker.minute}"
@@ -266,6 +298,7 @@ class HomeFragment : Fragment() {
         notificationManager.createNotificationChannel(channel)
     }
 
+    // Диалог выбора даты
     private fun showDatePickerDialog() {
         val calendar = Calendar.getInstance()
         DatePickerDialog( requireContext(),
@@ -295,13 +328,14 @@ class HomeFragment : Fragment() {
         dialog.show()
     }
 
+    // Метод открытия google календаря
     private fun addEventToGoogleCalendar(name: String, date: String) {
         val dateParts = date.split("/")
         if (dateParts.size != 3) {
             Toast.makeText(requireContext(), "Неверный формат даты", Toast.LENGTH_SHORT).show()
             return
         }
-
+        // Создание времени оповещения
         val calendar = Calendar.getInstance().apply {
             set(Calendar.YEAR, dateParts[2].toInt())
             set(Calendar.MONTH, dateParts[1].toInt() - 1)
@@ -311,7 +345,7 @@ class HomeFragment : Fragment() {
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
         }
-
+        // Создание intent google календаря
         val intent = Intent(Intent.ACTION_INSERT).apply {
             data = android.provider.CalendarContract.Events.CONTENT_URI
             putExtra(android.provider.CalendarContract.Events.TITLE, name)
@@ -321,6 +355,7 @@ class HomeFragment : Fragment() {
             putExtra(android.provider.CalendarContract.EXTRA_EVENT_END_TIME, calendar.timeInMillis + 60 * 60 * 1000) // 1 час
         }
 
+        // Открытие google календаря
         try {
             startActivity(intent)
         } catch (exception: Exception){
@@ -332,6 +367,7 @@ class HomeFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         if(changingRehearsal != null)
+            // Заполнение данных при наличии
             fillData(changingRehearsal!!)
         else {
             // Очистка полей
@@ -350,15 +386,9 @@ class HomeFragment : Fragment() {
     override fun onStop() {
         binding.mapview.onStop()
         MapKitFactory.getInstance().onStop()
+        // Очистка сохранённых данных
         changingRehearsal = null
         super.onStop()
     }
-
-
-    override fun onDestroy() {
-        super.onDestroy()
-        changingRehearsal = null
-    }
-
 }
 
