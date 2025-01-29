@@ -4,8 +4,11 @@ import android.Manifest
 import android.app.AlarmManager
 import android.content.Context
 import android.content.pm.PackageManager
+import android.icu.util.BuddhistCalendar
 import android.os.Build
 import android.os.Bundle
+import android.os.PersistableBundle
+import android.util.Log
 import android.view.Menu
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -23,8 +26,6 @@ import com.example.foractorwithrepetition.databinding.ActivityWithDrawerNavigati
 import com.yandex.mapkit.MapKitFactory
 
 class ActivityWithDrawerNavigation : AppCompatActivity() {
-
-
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityWithDrawerNavigationBinding
     private val SCHEDULE_EXACT_ALARM_PERMISSION_REQUEST_CODE = 1
@@ -32,15 +33,6 @@ class ActivityWithDrawerNavigation : AppCompatActivity() {
     companion object {
         private const val REQUEST_RECORD_AUDIO_PERMISSION = 200
     }
-
-    private fun setApiKey(savedInstanceState: Bundle?) {
-        val haveApiKey = savedInstanceState?.getBoolean("haveApiKey")
-            ?: false // При первом запуске приложения всегда false
-        if (!haveApiKey) {
-            MapKitFactory.setApiKey("33bad7a0-835a-4649-b87e-0c8ac0567432")
-        }
-    } // API-ключ должен быть задан единожды перед инициализацией MapKitFactory
-
 
     // Проверки для разрешения уведомлений
     @RequiresApi(Build.VERSION_CODES.S)
@@ -51,6 +43,7 @@ class ActivityWithDrawerNavigation : AppCompatActivity() {
             Toast.makeText(this, "Точные будильники не могут быть запланированы.", Toast.LENGTH_SHORT).show()
         }
     }
+
     // Проверки разрешения голосового взаимодействия
     private fun checkAndRequestAudioPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
@@ -60,69 +53,34 @@ class ActivityWithDrawerNavigation : AppCompatActivity() {
             Toast.makeText(this, "Разрешение на запись аудио уже предоставлено.", Toast.LENGTH_SHORT).show()
         }
     }
-
-override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-    super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-    when (requestCode) {
-        SCHEDULE_EXACT_ALARM_PERMISSION_REQUEST_CODE -> {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                if (canScheduleExactAlarms()) {
-                    // Ваш код для установки будильника, если требуется
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            AUDIO_PERMISSION_REQUEST_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "Разрешение на запись аудио предоставлено.", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Разрешение на запись аудио отклонено.", Toast.LENGTH_SHORT).show()
                 }
-            } else {
-                Toast.makeText(this, "Разрешение для установки будильника отклонено.", Toast.LENGTH_SHORT).show()
-            }
-        }
-        AUDIO_PERMISSION_REQUEST_CODE -> {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "Разрешение на запись аудио предоставлено.", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "Разрешение на запись аудио отклонено.", Toast.LENGTH_SHORT).show()
             }
         }
     }
-//    if (requestCode == SCHEDULE_EXACT_ALARM_PERMISSION_REQUEST_CODE) {
-//        if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//            //val name = binding.rehearsalName.text.toString()
-//            if (canScheduleExactAlarms()) {
-//                //setAlarm(name)
-//            } else {
-//                Toast.makeText(this@ActivityWithDrawerNavigation, "Точные будильники не могут быть запланированы.", Toast.LENGTH_SHORT).show()
-//            }
-//        } else {
-//            Toast.makeText(this, "Разрешение для установки будильника отклонено.", Toast.LENGTH_SHORT).show()
-//        }
-//    }else{
-//        Toast.makeText(this, "ГАСИТСЯ ПОЧЕМУ.", Toast.LENGTH_SHORT).show()
-//    }
-}
-private fun canScheduleExactAlarms(): Boolean {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        val alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarmManager.canScheduleExactAlarms()
-    } else true
-}
 
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        setApiKey(savedInstanceState)
+        MapKitFactory.setApiKey("33bad7a0-835a-4649-b87e-0c8ac0567432")
         MapKitFactory.initialize(this)
-            // SearchFactory.initialize(this)
+        MapKitFactory.getInstance().onStart()
         binding = ActivityWithDrawerNavigationBinding.inflate(layoutInflater)
         setContentView(binding.root)
         checkAndRequestPermissions()
         checkAndRequestAudioPermission()  // Вызов функции для проверки разрешения на запись аудио
-
         setSupportActionBar(binding.appBarActivityWithDrawerNavigation.toolbar)
-
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
         val navController =
             findNavController(R.id.nav_host_fragment_content_activity_with_drawer_navigation)
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow, R.id.nav_qr, R.id.nav_qr_generate,  R.id.nav_detail_theatre
@@ -132,15 +90,16 @@ private fun canScheduleExactAlarms(): Boolean {
         navView.setupWithNavController(navController)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.activity_with_drawer_navigation, menu)
-        return true
-    }
-
     override fun onSupportNavigateUp(): Boolean {
         val navController =
             findNavController(R.id.nav_host_fragment_content_activity_with_drawer_navigation)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    }
+
+    override fun onDestroy() {
+        MapKitFactory.getInstance().onStop()
+        Log.i("Destroyed", "End")
+        super.onDestroy()
+        System.exit(-1)
     }
 }
