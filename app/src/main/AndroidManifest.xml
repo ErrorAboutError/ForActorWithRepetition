@@ -46,10 +46,10 @@
         <activity
             android:name=".LoginRegistration"
             android:exported="true"
+            android:noHistory="true"
             android:theme="@style/SplashScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -58,29 +58,12 @@
             android:exported="true"
             android:label="@string/title_activity_with_drawer_navigation"
             android:theme="@style/Theme.ForActorWithRepetition.NoActionBar">
-
-            <!-- <intent-filter> -->
-            <!-- &lt;!&ndash;                <action android:name="android.intent.action.MAIN" />&ndash;&gt; -->
-            <!-- &lt;!&ndash;                <category android:name="android.intent.category.LAUNCHER" />&ndash;&gt; -->
-            <!-- </intent-filter> -->
         </activity>
 
         <receiver
             android:name=".AlarmReceiver"
             android:enabled="true"
             android:exported="true" />
-
-        <activity
-            android:name=".MainActivity"
-            android:exported="true">
-
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.MAIN" /> -->
-
-
-            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-            <!-- </intent-filter> -->
-        </activity>
     </application>
 
 </manifest>

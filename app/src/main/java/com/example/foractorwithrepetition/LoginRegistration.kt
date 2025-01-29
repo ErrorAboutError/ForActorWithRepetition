@@ -18,6 +18,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.Scope
 import com.google.android.material.button.MaterialButton
+import com.yandex.mapkit.MapKitFactory
 
 class LoginRegistration : AppCompatActivity() {
     private lateinit var googleSignInClient: GoogleSignInClient
@@ -29,6 +30,7 @@ class LoginRegistration : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_ForActorWithRepetition_NoActionBar)
         super.onCreate(savedInstanceState)
+
         _binding = ActivityLoginRegistrationBinding.inflate(layoutInflater)
         val root: View = binding.root
         setContentView(binding.root) // Используем разметку из binding
@@ -47,14 +49,11 @@ class LoginRegistration : AppCompatActivity() {
         }
         // Настройка авторизации Google
         setupGoogleSignIn()
-
         // Обработка нажатия кнопки Google Sign-In
         val googleSignInButton = findViewById<ImageButton>(R.id.signin_google)
         googleSignInButton.setOnClickListener {
             signInWithGoogle()
         }
-
-      //return root
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -66,7 +65,9 @@ class LoginRegistration : AppCompatActivity() {
                 Toast.makeText(this, "Авторизация успешна!", Toast.LENGTH_SHORT).show()
                 // Переход на новую активность после успешного входа
                 val intent = Intent(this, ActivityWithDrawerNavigation::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 startActivity(intent)
+                ActivityCompat.finishAffinity(this)
                 finish()
             } else {
                 Toast.makeText(this, "Ошибка входа в Google", Toast.LENGTH_SHORT).show()
@@ -86,22 +87,5 @@ class LoginRegistration : AppCompatActivity() {
     private fun signInWithGoogle() {
         val signInIntent = googleSignInClient.signInIntent
         startActivityForResult(signInIntent, REQUEST_CODE_SIGN_IN)
-//        val intent = Intent(this,  ActivityWithDrawerNavigation::class.java)
-//        startActivity(intent)
-//        finish()
-    }
-
-    private fun requestPermission() {
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.GET_ACCOUNTS
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.GET_ACCOUNTS),
-                REQUEST_CODE_PERMISSION
-            )
-        }
     }
 }
