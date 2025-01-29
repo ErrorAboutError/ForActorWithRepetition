@@ -1,6 +1,7 @@
 package com.example.foractorwithrepetition.ui.home
 
 
+import android.Manifest
 import android.app.AlarmManager
 import android.app.DatePickerDialog
 import android.app.NotificationChannel
@@ -8,7 +9,10 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.location.Geocoder
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -19,25 +23,21 @@ import android.widget.DatePicker
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.NavController
-import androidx.navigation.fragment.findNavController
 import com.example.foractorwithrepetition.AlarmReceiver
-import com.example.foractorwithrepetition.R
 import com.example.foractorwithrepetition.Rehearsal
 import com.example.foractorwithrepetition.RehearsalAdapter
 import com.example.foractorwithrepetition.RehearsalViewModel
 import com.example.foractorwithrepetition.databinding.FragmentHomeBinding
-import com.yandex.mapkit.*
+import com.yandex.mapkit.Animation
+import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.layers.GeoObjectTapListener
 import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.GeoObjectSelectionMetadata
-import com.yandex.mapkit.map.InputListener
-import com.yandex.mapkit.map.Map
 import com.yandex.mapkit.map.MapWindow
-import com.yandex.mapkit.search.Address
 import com.yandex.runtime.Runtime
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -48,12 +48,16 @@ import java.util.Locale
 class HomeFragment : Fragment() {
 
 
+    private var locationByNetwork: android.location.Location? = null
+    private var locationByGps: android.location.Location? = null
     private val CHANNEL_ID = "channelid"
     private val SCHEDULE_EXACT_ALARM_PERMISSION_REQUEST_CODE = 1
     private lateinit var alarmManager: AlarmManager
     private lateinit var rehearsalViewModel: RehearsalViewModel
     private lateinit var rehearsalAdapter: RehearsalAdapter
     private val REQUEST_LOCATION_PERMISSION = 1
+    private var latitude = 59.935493
+    private var longtitute = 30.327392
     var selectedCoordinate = ""
     private lateinit var mapWindow: MapWindow
 
@@ -63,6 +67,27 @@ class HomeFragment : Fragment() {
 
     companion object{
        var changingRehearsal: Rehearsal? = null
+    }
+
+    val gpsLocationListener: LocationListener = object : LocationListener {
+
+        override fun onLocationChanged(location: android.location.Location) {
+            locationByGps= location
+        }
+
+        override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
+        override fun onProviderEnabled(provider: String) {}
+        override fun onProviderDisabled(provider: String) {}
+    }
+    val networkLocationListener: LocationListener = object : LocationListener {
+
+        override fun onLocationChanged(location: android.location.Location) {
+            locationByNetwork= location
+        }
+
+        override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
+        override fun onProviderEnabled(provider: String) {}
+        override fun onProviderDisabled(provider: String) {}
     }
 
     // Заполнение данных
@@ -126,6 +151,7 @@ class HomeFragment : Fragment() {
         Log.i("time", currentTime)
         Log.i("time2", time)
         Log.i("time2", (time <= currentTime).toString())
+
         // Проверка, что указана дата и время, находящиеся в будущем
         if( (binding.rehearsalDate.text.toString() < currentDate ) || (binding.rehearsalDate.text.toString() == currentDate
                     && time <= currentTime)){
@@ -228,6 +254,11 @@ class HomeFragment : Fragment() {
         binding.coordinate.text.clear()
         binding.deleteButton.visibility = View.GONE
         binding.addButton.text = "Добавить"
+        // Перевод камеры на Санкт-Петербург
+        val position = CameraPosition(Point(latitude, longtitute), 10f, 0f, 0f)
+        binding.mapview.map.move(position, SMOOTH_ANIMATION, null)
+        // Загрузка геолокации пользователя
+        getLocation()
         createNotificationChannel() //Создание канала отправки оповещений
         val root: View = binding.root
         binding.timePicker.setIs24HourView(true)
@@ -245,6 +276,85 @@ class HomeFragment : Fragment() {
         mapWindow = binding.mapview.mapWindow
         binding.mapview.map.addTapListener(geoObjectTapListener)
         return root
+    }
+
+    // Загрузка геолокации пользователя
+    private  fun getLocation() {
+
+        // Проверка выданныъ разрешений
+        if (ActivityCompat.checkSelfPermission(
+                requireActivity(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                requireActivity(),
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            Toast.makeText(requireContext(), "Доступ к геолокации не выдан", Toast.LENGTH_LONG).show()
+        } else {
+            lateinit var locationManager: LocationManager
+            locationManager = requireActivity().getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+            // Проверка доступного способа геолокации
+            val hasGps = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+            val hasNetwork = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+            // Загрузка геолокации по GPS
+            if (hasGps) {
+                locationManager.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER,
+                    5000,
+                    0F,
+                    gpsLocationListener
+                )
+            }
+            // Загрузка геолокации по сети
+            if (hasNetwork) {
+                locationManager.requestLocationUpdates(
+                    LocationManager.NETWORK_PROVIDER,
+                    5000,
+                    0F,
+                    networkLocationListener
+                )
+            }
+            // Загрузка последней локации по GPS
+            val lastKnownLocationByGps =
+                locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+            lastKnownLocationByGps?.let {
+                locationByGps = lastKnownLocationByGps
+            }
+            // Загрузка последней локации по GPS
+            val lastKnownLocationByNetwork =
+                locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+            lastKnownLocationByNetwork?.let {
+                locationByNetwork = lastKnownLocationByNetwork
+            }
+            // Сравнение точности определения геолокации разных способов и выбор более точной
+            if (locationByGps != null && locationByNetwork != null) {
+                if (locationByGps!!.accuracy > locationByNetwork!!.accuracy) {
+                    latitude = locationByGps!!.latitude
+                    longtitute = locationByGps!!.longitude
+                } else {
+                    latitude = locationByNetwork!!.latitude
+                    longtitute = locationByNetwork!!.longitude
+                }
+            }
+            // Загрузка геолокации по GPS
+            else if (locationByGps != null){
+                latitude = locationByGps!!.latitude
+                longtitute = locationByGps!!.longitude
+            }
+            // Загрузка геолокации по сети
+            else
+                if (locationByNetwork != null){
+                    latitude = locationByNetwork!!.latitude
+                    longtitute = locationByNetwork!!.longitude
+                }
+
+            // Перенос карты на геолокацию пользователя
+            val position = CameraPosition(Point(latitude, longtitute), 17.5f, 0f, 0f)
+            binding.mapview.map.move(position, SMOOTH_ANIMATION, null)
+        }
+
     }
 
     @RequiresApi(Build.VERSION_CODES.S)
@@ -424,6 +534,7 @@ class HomeFragment : Fragment() {
         }
         MapKitFactory.getInstance().onStart()
         binding.mapview.onStart()
+
     }
 
     override fun onStop() {
@@ -433,5 +544,8 @@ class HomeFragment : Fragment() {
         changingRehearsal = null
         super.onStop()
     }
+
 }
+
+
 
