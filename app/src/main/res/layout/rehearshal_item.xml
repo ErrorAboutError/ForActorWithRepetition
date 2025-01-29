@@ -13,7 +13,6 @@
     app:cardElevation="10dp"
     android:layout_margin="5dp">
 
-
     <!-- Root LinearLayout to arrange elements horizontally -->
     <LinearLayout
         android:layout_width="match_parent"
