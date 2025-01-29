@@ -5,42 +5,47 @@
     android:layout_height="match_parent"
     tools:context=".QRFragment"
     android:layout_gravity="center_horizontal"
-    android:orientation="vertical">
+    android:gravity="center"
+    android:orientation="vertical"
+    android:background="@drawable/white">
 
-    <!-- TODO: Update blank fragment layout -->
-<!--    <TextView-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent"-->
-<!--        android:text="@string/qr_blank" />-->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:layout_gravity="center"
         android:layout_marginEnd="5dp">
+
         <Button
             android:id="@+id/createQR"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Создать">
+            android:layout_width="350dp"
+            android:layout_height="80dp"
+            android:text="Создать"
+            android:textSize="25sp"
+            android:drawableLeft="@drawable/create"
+            android:layout_marginBottom="20dp"
+            >
         </Button>
         <Button android:id="@+id/scanQR"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Скан">
+            android:layout_width="350dp"
+            android:layout_height="80dp"
+            android:text="Сканировать"
+            android:textSize="25sp"
+            android:drawableLeft="@drawable/scan"
+            android:layout_marginTop="20dp">
         </Button>
     </LinearLayout>
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginEnd="5dp">
-        <androidx.recyclerview.widget.RecyclerView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+<!--    <LinearLayout-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_gravity="center"-->
+<!--        android:layout_marginEnd="5dp">-->
+<!--        <androidx.recyclerview.widget.RecyclerView-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content">-->
 
-        </androidx.recyclerview.widget.RecyclerView>
-    </LinearLayout>
+<!--        </androidx.recyclerview.widget.RecyclerView>-->
+<!--    </LinearLayout>-->
 
 
 </LinearLayout>

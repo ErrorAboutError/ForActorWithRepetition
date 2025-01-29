@@ -50,6 +50,14 @@ class CreateQRFragment : Fragment() {
                 createQRCode(binding.editText.text.toString().trim())
             }
         }
+        binding.editText.alpha=0f
+        binding.linear.alpha=0f
+        binding.buttonGenerate.alpha=0f
+
+        binding.editText.animate().alpha(1f).translationYBy((30).toFloat()).setStartDelay(300).duration=1500
+        binding.linear.animate().alpha(1f).translationYBy((30).toFloat()).setStartDelay(300).duration=1500
+        binding.buttonGenerate.animate().alpha(1f).translationYBy((30).toFloat()).setStartDelay(300).duration=1500
+
         return root
        // return inflater.inflate(R.layout.fragment_create_q_r, container, false)
     }

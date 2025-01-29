@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.createQR.CreateQRFragment"
+    android:background="@drawable/violet"
     >
     <EditText
         android:id="@+id/editText"
@@ -13,43 +14,82 @@
         android:layout_weight="1"
         android:ems="10"
         android:hint="Введите текст"
+        android:textColorHint="@color/white"
         android:inputType="text"
+        android:textColor="@color/white"
+        android:background="@drawable/search_bkg"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="20dp"/>
 
-    <ImageView
-        android:id="@+id/imageView2"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
-        android:layout_weight="1"
+    <LinearLayout
+        android:id="@+id/linear"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/custom_edittext"
+        android:backgroundTint="@color/white"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="24dp"
+        android:layout_margin="5dp"
+        app:layout_constraintBottom_toTopOf="@+id/buttonShare"
+        app:layout_constraintTop_toBottomOf="@+id/editText">
+
+        <ImageView
+            android:id="@+id/imageView2"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:layout_weight="1"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toTopOf="@+id/buttonGenerate"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/editText"
+            tools:src="@tools:sample/avatars" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Здесь будет ваш QR-код">
+        </TextView>
+
+    </LinearLayout>
+
+
+
+<!--    <ImageButton-->
+<!--        android:id="@+id/buttonShare"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="60dp"-->
+<!--        android:layout_weight="1"-->
+<!--        android:backgroundTint="@color/white"-->
+<!--        android:textSize="20sp"-->
+<!--        android:src="@drawable/baseline_share_24"-->
+<!--        app:layout_constraintBottom_toTopOf="@+id/buttonGenerate"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent" />-->
+    <Button android:id="@+id/buttonShare"
+        android:layout_width="250dp"
+        android:layout_height="60dp"
+        android:text="Поделиться"
+        android:textSize="25sp"
+        android:drawableLeft="@drawable/share"
+        android:layout_margin="10dp"
         app:layout_constraintBottom_toTopOf="@+id/buttonGenerate"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editText"
-        tools:src="@tools:sample/avatars"
-        android:visibility="invisible"/>
-
-    <ImageButton
-        android:id="@+id/buttonShare"
-        android:layout_width="wrap_content"
-        android:layout_height="60dp"
-        android:layout_weight="1"
-        android:backgroundTint="@color/white"
-        android:textSize="20sp"
-        android:src="@drawable/baseline_share_24"
-        app:layout_constraintBottom_toTopOf="@+id/buttonGenerate"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        android:visibility="invisible">
+    </Button>
 
     <Button
         android:id="@+id/buttonGenerate"
-        android:layout_width="wrap_content"
+        android:layout_width="350dp"
         android:layout_height="60dp"
         android:layout_weight="1"
         android:text="Сгенерировать QR"
-        android:textSize="20sp"
+        android:drawableLeft="@drawable/generate"
+        android:textSize="25sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

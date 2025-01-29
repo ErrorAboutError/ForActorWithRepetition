@@ -34,6 +34,15 @@ class qrCodeFragment: Fragment() {
         binding.scanQR.setOnClickListener() {
             findNavController().navigate(R.id.action_qrCodeFragment_to_ScanQRFragment)
         }
+
+        binding.createQR.alpha =0f
+        binding.scanQR.alpha=0f
+
+        binding.createQR.animate().alpha(1f).translationYBy((30).toFloat()).setStartDelay(300).duration=1500
+        binding.scanQR.animate().alpha(1f).translationYBy((-30).toFloat()).setStartDelay(300).duration=1500
+
+
+
         return root
     }
 
