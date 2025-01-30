@@ -33,6 +33,8 @@ class CreateQRFragment : Fragment() {
 
     companion object {
         fun newInstance() = CreateQRFragment()
+
+        var shareId: String? = null
     }
 
     private lateinit var viewModel: CreateQRViewModel
@@ -57,7 +59,16 @@ class CreateQRFragment : Fragment() {
         binding.editText.animate().alpha(1f).translationYBy((30).toFloat()).setStartDelay(300).duration=1500
         binding.linear.animate().alpha(1f).translationYBy((30).toFloat()).setStartDelay(300).duration=1500
         binding.buttonGenerate.animate().alpha(1f).translationYBy((30).toFloat()).setStartDelay(300).duration=1500
-
+        // Если открыто для отправки
+        if(shareId != null){
+            binding.buttonGenerate.visibility = View.GONE
+            binding.editText.visibility = View.GONE
+            createQRCode(shareId!!)
+        } else {
+            binding.buttonGenerate.visibility = View.VISIBLE
+            binding.editText.visibility = View.VISIBLE
+            binding.imageView2.visibility = View.INVISIBLE
+        }
         return root
        // return inflater.inflate(R.layout.fragment_create_q_r, container, false)
     }
@@ -135,5 +146,10 @@ class CreateQRFragment : Fragment() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        shareId = null
     }
 }

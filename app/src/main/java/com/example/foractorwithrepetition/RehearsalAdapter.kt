@@ -15,6 +15,8 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
 import com.example.foractorwithrepetition.ui.gallery.GalleryFragment
+import com.example.foractorwithrepetition.ui.home.HomeFragment
+import com.yandex.runtime.Runtime
 import com.yandex.runtime.Runtime.getApplicationContext
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -40,9 +42,7 @@ class RehearsalAdapter(private var rehearsals: MutableList<Rehearsal>) : Recycle
             return true
         if(currentDate.split("/")[1] > date.split("/")[1])
             return true
-        if(currentDate.split("/")[0] > date.split("/")[0])
-            return true
-        return false
+        return currentDate.split("/")[0] > date.split("/")[0]
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RehearsalViewHolder {
@@ -91,14 +91,11 @@ class RehearsalAdapter(private var rehearsals: MutableList<Rehearsal>) : Recycle
                 if (!holder.switcher.isChecked) {
                     // Отмена включённого оповещения
                     val myIntent = Intent(
-                        getApplicationContext(),
+                        Runtime.getApplicationContext(),
                         AlarmReceiver::class.java
                     )
                     val pendingIntent = PendingIntent.getBroadcast(
-                        getApplicationContext(),
-                        rehearsals[position].id.toInt(),
-                        myIntent,
-                        PendingIntent.FLAG_IMMUTABLE
+                        Runtime.getApplicationContext(), (rehearsals[position]!!.id).toInt(), myIntent, PendingIntent.FLAG_IMMUTABLE
                     )
                     alManager.cancel(pendingIntent)
                     rehearsals[position].activated = false

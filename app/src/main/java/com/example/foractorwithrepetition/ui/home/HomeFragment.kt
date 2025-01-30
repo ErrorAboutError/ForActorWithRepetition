@@ -26,11 +26,15 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavController
+import androidx.navigation.fragment.findNavController
 import com.example.foractorwithrepetition.AlarmReceiver
+import com.example.foractorwithrepetition.R
 import com.example.foractorwithrepetition.Rehearsal
 import com.example.foractorwithrepetition.RehearsalAdapter
 import com.example.foractorwithrepetition.RehearsalViewModel
 import com.example.foractorwithrepetition.databinding.FragmentHomeBinding
+import com.example.foractorwithrepetition.ui.createQR.CreateQRFragment
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
@@ -64,9 +68,13 @@ class HomeFragment : Fragment() {
     var code = 0
     private val SMOOTH_ANIMATION = Animation(Animation.Type.SMOOTH, 0.4f)
     private lateinit var binding: FragmentHomeBinding
+    lateinit var navControler: NavController
 
     companion object{
-       var changingRehearsal: Rehearsal? = null
+        // Изменяемые данные
+        var changingRehearsal: Rehearsal? = null
+        // Флаг нового события
+        var loadingRehearsal: Boolean = false
     }
 
     val gpsLocationListener: LocationListener = object : LocationListener {
@@ -134,18 +142,39 @@ class HomeFragment : Fragment() {
         binding.coordinate.text.append(rehearsal.placeName)
         binding.rehearsalDate.text.append(rehearsal.date)
         binding.rehearsalName.text.append(rehearsal.name)
-        binding.addButton.text = "Изменить"
+        // Если событие уже есть - кнопка меняется
+        if(!loadingRehearsal) {
+            binding.addButton.text = "Изменить"
+            // Изменение обработчика нажатия на кнопку
+            binding.addButton.setOnClickListener {
+                changeRehearsal()
+            }
+        }
+        // Перевод камеры на выбранную геолокацию
         selectedCoordinate = rehearsal.location
-        // Изменение обработчика нажатия на кнопку
-        binding.addButton.setOnClickListener {
-            changeRehearsal()
-
+        binding.mapview.map.cameraPosition.run {
+            val point = Point(rehearsal.location.split(",")[0].toDouble(), rehearsal.location.split(",")[1].toDouble())
+            val position = CameraPosition(point, 17.5f, azimuth, tilt)
+            binding.mapview.map.move(position, SMOOTH_ANIMATION, null)
         }
         // Вывод на экран кнопки Удалить
         binding.deleteButton.visibility = View.VISIBLE
-        // Переопределение нажатия на кнопку Добавить
-        binding.deleteButton.setOnClickListener {
-            deleteButtonClick(rehearsal)
+
+        if(loadingRehearsal){
+            binding.deleteButton.text = "Отмена"
+            binding.deleteButton.setOnClickListener{
+                navControler.navigate(R.id.nav_gallery)
+            }
+        } else {
+            binding.shareButton.visibility = View.VISIBLE
+            // Переопределение нажатия на кнопку Добавить
+            binding.deleteButton.setOnClickListener {
+                deleteButtonClick(rehearsal)
+            }
+            binding.shareButton.setOnClickListener {
+                CreateQRFragment.shareId = rehearsal.shareID
+                navControler.navigate(R.id.nav_qr_generate)
+            }
         }
     }
 
@@ -176,9 +205,7 @@ class HomeFragment : Fragment() {
             return true
         if(currentDate.split("/")[1] > date.split("/")[1])
             return true
-        if(currentDate.split("/")[0] > date.split("/")[0])
-            return true
-        return false
+        return currentDate.split("/")[0] > date.split("/")[0]
     }
     private fun changeRehearsal(){
         // Проверка на ввод данных
@@ -229,7 +256,7 @@ class HomeFragment : Fragment() {
         // Изменение события
         rehearsalViewModel.updateRehearsal(Rehearsal(id = changingRehearsal!!.id,name = binding.rehearsalName.text.toString(), time = time,
             date = "${binding.rehearsalDate.text}", timeInMiles = calendar.timeInMillis, activated = changingRehearsal!!.activated,
-            location = selectedCoordinate, placeName = binding.coordinate.text.toString()))
+            location = selectedCoordinate, placeName = binding.coordinate.text.toString(), shareID = changingRehearsal!!.shareID))
         // Отмена включённого оповещения
         val myIntent = Intent(
             Runtime.getApplicationContext(),
@@ -264,12 +291,14 @@ class HomeFragment : Fragment() {
         // Инициализация binding
         binding = FragmentHomeBinding.inflate(inflater, container, false)
         // Очистка полей
-        Log.i("Clear", binding.rehearsalName.text.toString())
+        Log.i("Clear", "Error")
         binding.rehearsalName.text.clear()
         binding.rehearsalDate.text.clear()
         binding.coordinate.text.clear()
         binding.deleteButton.visibility = View.GONE
+        binding.shareButton.visibility = View.GONE
         binding.addButton.text = "Добавить"
+        navControler = findNavController()
         // Перевод камеры на Санкт-Петербург
         val position = CameraPosition(Point(latitude, longtitute), 10f, 0f, 0f)
         binding.mapview.map.move(position, SMOOTH_ANIMATION, null)
@@ -444,9 +473,14 @@ class HomeFragment : Fragment() {
                     ":${binding.timePicker.minute}"
                 if(time.length == 4)
                     time = "0$time"
+                // Если изменяется уже существующее событие, передаём id для отправки
+                if(changingRehearsal != null)
                 rehearsalViewModel.insert(Rehearsal(name = name, time = time,
                     date = "${binding.rehearsalDate.text}", timeInMiles = calendar.timeInMillis, activated = true,
-                    location = selectedCoordinate, placeName = coordinate))
+                    location = selectedCoordinate, placeName = coordinate, shareID = changingRehearsal!!.shareID), loadingRehearsal) else
+                    rehearsalViewModel.insert(Rehearsal(name = name, time = time,
+                        date = "${binding.rehearsalDate.text}", timeInMiles = calendar.timeInMillis, activated = true,
+                        location = selectedCoordinate, placeName = coordinate, shareID = null), loadingRehearsal)
                 addEventToGoogleCalendar(name, date)
                 // Очистка полей
                 binding.rehearsalName.text.clear()
@@ -563,6 +597,7 @@ class HomeFragment : Fragment() {
         MapKitFactory.getInstance().onStop()
         // Очистка сохранённых данных
         changingRehearsal = null
+        loadingRehearsal = false
         super.onStop()
     }
 

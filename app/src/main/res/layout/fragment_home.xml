@@ -82,6 +82,12 @@
             android:text="Добавить"
             android:layout_gravity="center"/>
         <Button
+            android:id="@+id/shareButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Поделиться"
+            android:layout_gravity="center"/>
+        <Button
             android:id="@+id/deleteButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
