@@ -22,5 +22,7 @@ data class Rehearsal (
     // Местоположение события
     val location: String,
     // Адрес события
-    val placeName: String
+    val placeName: String,
+    // ID для распространения с помощью qr кода
+    var shareID: String?
 )
