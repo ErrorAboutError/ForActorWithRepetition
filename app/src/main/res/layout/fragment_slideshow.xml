@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.slideshow.SlideshowFragment">
+    tools:context=".ui.slideshow.SlideshowFragment"
+    android:background="@drawable/white">
 
     <androidx.appcompat.widget.SearchView
         android:id="@+id/searchEditText"
@@ -24,6 +25,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:queryHint="Search..."
+        android:textColor="@android:color/white"
+        android:textColorHint ="@android:color/white"
         app:searchHintIcon="@null" />
 
 

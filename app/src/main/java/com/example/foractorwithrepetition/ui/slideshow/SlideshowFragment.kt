@@ -15,6 +15,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.get
+import androidx.core.view.isEmpty
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
@@ -45,17 +47,12 @@ import com.yandex.runtime.network.RemoteError
 class SlideshowFragment : Fragment(), AdapterDataTheatreClass.OnItemClickListener {
 
     private var _binding: FragmentSlideshowBinding? = null
-    var adapter: AdapterDataTheatreClass? = null
-    var androidData: DataThearteClass? = null
-    var searchView: SearchView? = null
-    private val dataList: ArrayList<DataThearteClass> = arrayListOf()
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
-    private lateinit var searchManager: SearchManager
-    private var searchSession: BlobStoreManager.Session? = null
-
     private val binding get() = _binding!!
+    var adapter: AdapterDataTheatreClass? = null
+    private val dataList: ArrayList<DataThearteClass> = arrayListOf()
+    private lateinit var searchManager: SearchManager
+    //private var searchSession: BlobStoreManager.Session? = null
+
     companion object {
         private const val SPEECH_REQUEST_CODE = 100
     }
@@ -65,43 +62,31 @@ class SlideshowFragment : Fragment(), AdapterDataTheatreClass.OnItemClickListene
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val slideshowViewModel =
-            ViewModelProvider(this).get(SlideshowViewModel::class.java)
 
         _binding = FragmentSlideshowBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
         binding.searchEditText.setQuery("", false) // устанавливаем нуевой запрос
-        //binding.searchEditText.onActionViewCollapsed() // действие запроса сворачивается
 
         MapKitFactory.initialize(requireContext()) // Инициализируем MapKit
-       // SearchFactory.initialize(requireContext())
         searchManager = SearchFactory.getInstance().createSearchManager(com.yandex.mapkit.search.SearchManagerType.COMBINED)
 
         // Очищаем dataList
         dataList.clear()
 
-        // Обновляем адаптер
-        adapter?.notifyDataSetChanged()
+        // Настройка адаптера для RecyclerView
+        adapter = AdapterDataTheatreClass(requireContext(), dataList, this)
+        binding.recyclerView.adapter = adapter
+        binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 1)
 
         // Настройка адаптера для RecyclerView
         binding.recyclerView.adapter = adapter
 
+        // Обработчик клика по иконке голосового поиска
         binding.searchEditText.setOnTouchListener { _, event ->
-//            if (event.action == MotionEvent.ACTION_UP) {
-//                // Проверяем, нажали ли на drawableEnd (иконка голосового ввода)
-//                if (event.rawX >= (binding.searchEditText.right.toFloat() - binding.searchEditText.compoundDrawablesRelative[2].bounds.width())) {
-//                    startVoiceInput()
-//                    return@setOnTouchListener true
-//                }
-//            }
-//            false
             if (event.action == MotionEvent.ACTION_UP) {
-                // Получаем доступ к вью, отвечающей за голосовой ввод
                 val searchPlate = binding.searchEditText.findViewById<View>(androidx.appcompat.R.id.search_plate)
                 val voiceIcon = searchPlate?.findViewById<ImageView>(androidx.appcompat.R.id.search_voice_btn)
-
-                // Проверяем, если нажали на голосовой ввод
                 if (voiceIcon != null && event.rawX >= (voiceIcon.right - voiceIcon.width)) {
                     startVoiceInput()
                     return@setOnTouchListener true
@@ -126,57 +111,19 @@ class SlideshowFragment : Fragment(), AdapterDataTheatreClass.OnItemClickListene
                 return true
             }
 
-            override fun onQueryTextChange(newText: String?): Boolean {
+            override fun onQueryTextChange(newText: String): Boolean {
+                searchList(newText)
                 // Обработка изменения текста поиска
                 return false
             }
         })
+        binding.searchEditText.setQuery("Saint-Petersburg", true)
+        searchTheaters(binding.searchEditText.query.toString())
 
-      //  setupRecyclerView()
-        val gridLayoutManager = GridLayoutManager(requireContext(), 1)
-        binding.recyclerView.layoutManager = gridLayoutManager
-       dataList.apply{
-           add(DataThearteClass("Театр Таро", "улица Гороховая, 51", "Открыто до 01:00", R.drawable.threatrelist, ""))
-           add(DataThearteClass("Кинотеатр Лицедей", "улица Гороховая, 51", "Открыто до 23:00", R.drawable.streethaus, ""))
-           add(DataThearteClass("Отдыхающая уточка", "улица Гороховая, 51", "Открыто до 22:00", R.drawable.theareslider, ""))
-           add(DataThearteClass("Клоун-мим театр \"Фантазия кончилась\"", "улица Гороховая, 51", "Открыто до 02:00", R.drawable.theatreyandex, ""))
-           //add(DataThearteClass("Rating Bar", R.string.rating, "Java", R.drawable.date_detail))
-       }
-        adapter = AdapterDataTheatreClass(requireContext(), dataList, this)
-        binding.recyclerView.adapter = adapter
-
-
-
-        binding.searchEditText.clearFocus()
-        binding.searchEditText.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String): Boolean {
-                return false
-            }
-
-            override fun onQueryTextChange(newText: String): Boolean {
-                searchList(newText)
-                return true
-            }
-        })
-
+    binding.searchEditText.clearFocus()
         return root
     }
-//    private fun setupRecyclerView() {
-//        dataList.apply {
-//            add(DataThearteClass("Camera", R.string.camera, "Java", R.drawable.date_detail))
-//            add(DataThearteClass("RecyclerView", R.string.recyclerview, "Kotlin", R.drawable.date_detail))
-//            add(DataThearteClass("Date Picker", R.string.date, "Java", R.drawable.date_detail))
-//            add(DataThearteClass("EditText", R.string.edit, "Kotlin", R.drawable.date_detail))
-//            add(DataThearteClass("Rating Bar", R.string.rating, "Java", R.drawable.date_detail))
-//        }
-//
-//        adapter = AdapterDataTheatreClass(requireContext(), dataList, this)
-//        binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 1)
-//        binding.recyclerView.adapter = adapter
-//    }
 
-
-//
     override fun onItemClick(item: DataThearteClass) {
 
         val bundle = Bundle().apply {
@@ -232,7 +179,7 @@ class SlideshowFragment : Fragment(), AdapterDataTheatreClass.OnItemClickListene
     // Метод для поиска театров в городе:
     private fun searchTheaters(city: String) {
         // Используем MapKit API для запроса по названию города
-        val visibleRegion = binding.mapView.map.visibleRegion  // Получаем видимую область карты
+        val visibleRegion = binding.mapView.map.visibleRegion ?: return // Получаем видимую область карты
         val searchManager = SearchFactory.getInstance().createSearchManager(SearchManagerType.COMBINED)
         val searchOptions = SearchOptions().apply { searchTypes = SearchType.BIZ.value }
         val searchArea = Geometry.fromBoundingBox(BoundingBox(visibleRegion.bottomLeft, visibleRegion.topRight))
@@ -247,12 +194,6 @@ class SlideshowFragment : Fragment(), AdapterDataTheatreClass.OnItemClickListene
                         item.obj?.let {obj->
                             val metadata = obj.metadataContainer?.toString() ?: "No metadata"
                             Log.d("Metadata", metadata) // Логируем метаданные объекта
-
-//                            val websiteUrl = obj.metadataContainer
-//                                ?.getItem(BusinessObjectMetadata::class.java)
-//                                ?.let { metadata ->
-//                                    metadata.links // Используйте подходящее поле
-//                                } ?: "No URL"
 
                             val websiteUrls = obj.metadataContainer
                                 ?.getItem(BusinessObjectMetadata::class.java)
