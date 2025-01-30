@@ -23,8 +23,8 @@ import java.time.format.DateTimeFormatter
 // Адаптер для отображения событий
 class RehearsalAdapter(private var rehearsals: MutableList<Rehearsal>) : RecyclerView.Adapter<RehearsalAdapter.RehearsalViewHolder>() {
 
-
     var counter = 0
+    lateinit var rehearsalViewModel: RehearsalViewModel
     inner class RehearsalViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val title: TextView = itemView.findViewById(R.id.titleText)
         val time: TextView = itemView.findViewById(R.id.timeText)
@@ -33,7 +33,18 @@ class RehearsalAdapter(private var rehearsals: MutableList<Rehearsal>) : Recycle
         val place: TextView = itemView.findViewById(R.id.placeText)
     }
 
-    lateinit var rehearsalViewModel: RehearsalViewModel
+    // Функция сравнения дат
+    // Возврщает false, если дата прошла
+    private fun checkDate(date: String, currentDate: String): Boolean{
+        if(currentDate.split("/")[2] > date.split("/")[2])
+            return true
+        if(currentDate.split("/")[1] > date.split("/")[1])
+            return true
+        if(currentDate.split("/")[0] > date.split("/")[0])
+            return true
+        return false
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RehearsalViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.rehearshal_item, parent, false)
         return RehearsalViewHolder(view)
@@ -45,14 +56,13 @@ class RehearsalAdapter(private var rehearsals: MutableList<Rehearsal>) : Recycle
         val formatterDate = DateTimeFormatter.ofPattern("dd/MM/yyyy")
         val currentDate = LocalDateTime.now().format(formatterDate)
         val formatterTime = DateTimeFormatter.ofPattern("HH:mm")
-        val currentTime = LocalDateTime.now().format(formatterTime)
-
+        var currentTime = LocalDateTime.now().format(formatterTime)
         // Заолнение название события
         holder.title.text = rehearsals[position].name
         // Заполнение времени события
         holder.time.text = rehearsals[position].time
-        if( (rehearsals[position].date < currentDate ) || (rehearsals[position].date == currentDate
-                    && rehearsals[position].time <= currentTime)) {
+        if( checkDate(rehearsals[position].date, currentDate ) || ( rehearsals[position].date == currentDate
+                    && rehearsals[position].time <= currentTime )) {
             rehearsalViewModel.updateActivation(position.toLong(), rehearsals[position].activated)
             holder.switcher.setChecked(false)
         } else
@@ -67,7 +77,10 @@ class RehearsalAdapter(private var rehearsals: MutableList<Rehearsal>) : Recycle
         }
         // Обработка нажатия на переключатель
         holder.switcher.setOnClickListener{
-            if( (rehearsals[position].date < currentDate ) || (rehearsals[position].date == currentDate
+            Log.i(rehearsals[position].date, currentDate)
+            Log.i(rehearsals[position].time , currentTime)
+            Log.i(rehearsals[position].time , (rehearsals[position].time <= currentTime).toString())
+            if( checkDate(rehearsals[position].date, currentDate ) || (rehearsals[position].date == currentDate
                         && rehearsals[position].time <= currentTime)){
                 Log.i("No", "Not allowed")
                 Toast.makeText(getApplicationContext(), "Нельзя включать оповещение на уже прошедшее событие", Toast.LENGTH_LONG).show()
@@ -95,6 +108,7 @@ class RehearsalAdapter(private var rehearsals: MutableList<Rehearsal>) : Recycle
                     val alarmIntent =
                         Intent(holder.itemView.context, AlarmReceiver::class.java).apply {
                             putExtra("rehearsal_name", rehearsals[position].name)
+                            putExtra("coordinate", rehearsals[position].location)
                         }.let {
                             PendingIntent.getBroadcast(
                                 holder.itemView.context,

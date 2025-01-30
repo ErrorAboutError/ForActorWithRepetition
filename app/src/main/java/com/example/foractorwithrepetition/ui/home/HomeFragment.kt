@@ -79,6 +79,7 @@ class HomeFragment : Fragment() {
         override fun onProviderEnabled(provider: String) {}
         override fun onProviderDisabled(provider: String) {}
     }
+
     val networkLocationListener: LocationListener = object : LocationListener {
 
         override fun onLocationChanged(location: android.location.Location) {
@@ -88,119 +89,6 @@ class HomeFragment : Fragment() {
         override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
         override fun onProviderEnabled(provider: String) {}
         override fun onProviderDisabled(provider: String) {}
-    }
-
-    // Заполнение данных
-    fun fillData(rehearsal: Rehearsal){
-        // Заполнение полей
-        binding.timePicker.hour = rehearsal.time.split(":")[0].toInt()
-        binding.timePicker.minute = rehearsal.time.split(":")[1].toInt()
-        binding.coordinate.text.append(rehearsal.placeName)
-        binding.rehearsalDate.text.append(rehearsal.date)
-        binding.rehearsalName.text.append(rehearsal.name)
-        binding.addButton.text = "Изменить"
-        selectedCoordinate = rehearsal.location
-        // Изменение обработчика нажатия на кнопку
-        binding.addButton.setOnClickListener {
-            changeRehearsal()
-
-        }
-        // Вывод на экран кнопки Удалить
-        binding.deleteButton.visibility = View.VISIBLE
-        // Переопределение нажатия на кнопку Добавить
-        binding.deleteButton.setOnClickListener {
-            deleteButtonClick(rehearsal)
-        }
-    }
-
-    // Обработка нажатия на кнопку удалить
-    fun deleteButtonClick(rehearsal: Rehearsal){
-        val builder = AlertDialog.Builder(requireContext())
-        builder.setTitle("Удаление")
-        builder.setMessage("Вы уверены, что хотите удалить оповещение?")
-        builder.setPositiveButton("Да") { dialog, which ->
-            rehearsalViewModel.delete(rehearsal)
-            requireActivity().onBackPressed()// Пользователь нажал "Да"
-        }
-        builder.setNegativeButton("Нет") { dialog, which ->
-            // Пользователь нажал "Нет"
-            dialog.dismiss() // Закрыть диалог
-        }
-        // Создаем и показываем диалог
-        val dialog = builder.create()
-        dialog.show()
-    }
-
-    fun changeRehearsal(){
-        // Проверка на ввод данных
-        if (binding.rehearsalName.text.isEmpty() || binding.rehearsalDate.text.isEmpty() || binding.coordinate.text.isEmpty())
-            return
-        // Введённое время
-        val time = "${binding.timePicker.hour}" +
-                if(binding.timePicker.minute <= 9)
-                    ":0${binding.timePicker.minute}"
-                else
-                    ":${binding.timePicker.minute}"
-        // Получение текущих даты и времени
-        val formatterDate = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-        val currentDate = LocalDateTime.now().format(formatterDate)
-        val formatterTime = DateTimeFormatter.ofPattern("HH:mm")
-        val currentTime = LocalDateTime.now().format(formatterTime)
-        Log.i("date", currentDate)
-        Log.i("date2", binding.rehearsalDate.text.toString())
-        Log.i("time", currentTime)
-        Log.i("time2", time)
-        Log.i("time2", (time <= currentTime).toString())
-
-        // Проверка, что указана дата и время, находящиеся в будущем
-        if( (binding.rehearsalDate.text.toString() < currentDate ) || (binding.rehearsalDate.text.toString() == currentDate
-                    && time <= currentTime)){
-            Toast.makeText(requireContext(), "Необходимо ввести предстоящее событие", Toast.LENGTH_LONG).show()
-            return
-        }
-        val calendar = Calendar.getInstance().apply {
-            // Создание точного времени события
-            val dateParts = binding.rehearsalDate.text.toString().split("/")
-            if (dateParts.size == 3) {
-                set(Calendar.YEAR, dateParts[2].toInt())
-                set(Calendar.MONTH, dateParts[1].toInt() - 1)
-                set(Calendar.DAY_OF_MONTH, dateParts[0].toInt())
-                set(Calendar.HOUR_OF_DAY, binding.timePicker.hour)
-                set(Calendar.MINUTE, binding.timePicker.minute)
-                set(Calendar.SECOND, 0)
-                set(Calendar.MILLISECOND, 0)
-                if (timeInMillis < System.currentTimeMillis()) {
-                    add(Calendar.DAY_OF_YEAR, 1)
-                }
-            }
-        }
-        // Изменение события
-        rehearsalViewModel.updateRehearsal(Rehearsal(id = changingRehearsal!!.id,name = binding.rehearsalName.text.toString(), time = time,
-            date = "${binding.rehearsalDate.text}", timeInMiles = calendar.timeInMillis, activated = changingRehearsal!!.activated,
-            location = selectedCoordinate, placeName = binding.coordinate.text.toString()))
-        // Отмена включённого оповещения
-        val myIntent = Intent(
-            Runtime.getApplicationContext(),
-            AlarmReceiver::class.java
-        )
-        val pendingIntent = PendingIntent.getBroadcast(
-            Runtime.getApplicationContext(), (changingRehearsal!!.id).toInt(), myIntent, PendingIntent.FLAG_IMMUTABLE
-        )
-        alarmManager.cancel(pendingIntent)
-        // Добавление изменённого
-        val alarmIntent = Intent(context, AlarmReceiver::class.java).apply {
-            putExtra("rehearsal_name", binding.rehearsalName.text.toString())
-            putExtra("coordinate", selectedCoordinate)
-        }.let {
-            PendingIntent.getBroadcast(context, (changingRehearsal!!.id).toInt(), it, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE )
-        }
-        alarmManager.setExact(
-            AlarmManager.RTC_WAKEUP,
-            calendar.timeInMillis,
-            alarmIntent
-        )
-        // Переход ко списку событий
-        requireActivity().onBackPressed()
     }
 
     // Обработка нажатия на объект на карте
@@ -231,12 +119,140 @@ class HomeFragment : Fragment() {
         val knownName: String = addresses[0].featureName
         Log.i("placement", "$country $city $street $knownName")
         // Сохранение координат объекта
-        selectedCoordinate = "${binding.mapview.map.cameraPosition.target.latitude}, ${binding.mapview.map.cameraPosition.target.longitude}"
-        Log.i("placement", binding.mapview.map.cameraPosition.target.latitude.toString())
-        Log.i("placement", binding.mapview.map.cameraPosition.target.longitude.toString())
+        selectedCoordinate = "${point.latitude}, ${point.longitude}"
+        Log.i("placement", point.latitude.toString())
+        Log.i("placement", point.longitude.toString())
         binding.coordinate.text.clear()
         binding.coordinate.append("$country $city $street $knownName")
         true
+    }
+    // Заполнение данных
+    private fun fillData(rehearsal: Rehearsal){
+        // Заполнение полей
+        binding.timePicker.hour = rehearsal.time.split(":")[0].toInt()
+        binding.timePicker.minute = rehearsal.time.split(":")[1].toInt()
+        binding.coordinate.text.append(rehearsal.placeName)
+        binding.rehearsalDate.text.append(rehearsal.date)
+        binding.rehearsalName.text.append(rehearsal.name)
+        binding.addButton.text = "Изменить"
+        selectedCoordinate = rehearsal.location
+        // Изменение обработчика нажатия на кнопку
+        binding.addButton.setOnClickListener {
+            changeRehearsal()
+
+        }
+        // Вывод на экран кнопки Удалить
+        binding.deleteButton.visibility = View.VISIBLE
+        // Переопределение нажатия на кнопку Добавить
+        binding.deleteButton.setOnClickListener {
+            deleteButtonClick(rehearsal)
+        }
+    }
+
+    // Обработка нажатия на кнопку удалить
+    private fun deleteButtonClick(rehearsal: Rehearsal){
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle("Удаление")
+        builder.setMessage("Вы уверены, что хотите удалить оповещение?")
+        builder.setPositiveButton("Да") { dialog, which ->
+            rehearsalViewModel.delete(rehearsal)
+            requireActivity().onBackPressed()// Пользователь нажал "Да"
+        }
+        builder.setNegativeButton("Нет") { dialog, which ->
+            // Пользователь нажал "Нет"
+            dialog.dismiss() // Закрыть диалог
+        }
+        // Создаем и показываем диалог
+        val dialog = builder.create()
+        dialog.show()
+    }
+
+
+    // Функция сравнения дат
+    // Возврщает false, если дата прошла
+    private fun checkDate(date: String, currentDate: String): Boolean{
+        Log.i(date, currentDate)
+        if(currentDate.split("/")[2] > date.split("/")[2])
+            return true
+        if(currentDate.split("/")[1] > date.split("/")[1])
+            return true
+        if(currentDate.split("/")[0] > date.split("/")[0])
+            return true
+        return false
+    }
+    private fun changeRehearsal(){
+        // Проверка на ввод данных
+        if (binding.rehearsalName.text.isEmpty() || binding.rehearsalDate.text.isEmpty() || binding.coordinate.text.isEmpty())
+            return
+        // Введённое время
+        var time = "${binding.timePicker.hour}" +
+                if(binding.timePicker.minute <= 9)
+                    ":0${binding.timePicker.minute}"
+                else
+                    ":${binding.timePicker.minute}"
+        if(time.length == 4)
+            time = "0$time"
+        // Получение текущих даты и времени
+        val formatterDate = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+        val currentDate = LocalDateTime.now().format(formatterDate)
+        val formatterTime = DateTimeFormatter.ofPattern("HH:mm")
+        val currentTime = LocalDateTime.now().format(formatterTime)
+        Log.i("date", currentDate)
+        Log.i("date2", binding.rehearsalDate.text.toString())
+        Log.i("time", currentTime)
+        Log.i("time2", time)
+        Log.i("time2", (time <= currentTime).toString())
+
+        // Проверка, что указана дата и время, находящиеся в будущем
+        if( (checkDate(binding.rehearsalDate.text.toString(), currentDate) ) || (binding.rehearsalDate.text.toString() == currentDate
+                    && time <= currentTime)){
+            Toast.makeText(requireContext(), "Необходимо ввести предстоящее событие", Toast.LENGTH_LONG).show()
+            return
+        }
+        val calendar = Calendar.getInstance().apply {
+            // Создание точного времени события
+            val dateParts = binding.rehearsalDate.text.toString().split("/")
+            if (dateParts.size == 3) {
+                set(Calendar.YEAR, dateParts[2].toInt())
+                set(Calendar.MONTH, dateParts[1].toInt() - 1)
+                set(Calendar.DAY_OF_MONTH, dateParts[0].toInt())
+                set(Calendar.HOUR_OF_DAY, binding.timePicker.hour)
+                set(Calendar.MINUTE, binding.timePicker.minute)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+                if (timeInMillis < System.currentTimeMillis()) {
+                    add(Calendar.DAY_OF_YEAR, 1)
+                }
+            }
+        }
+        Log.i("activated", changingRehearsal!!.activated.toString())
+        // Изменение события
+        rehearsalViewModel.updateRehearsal(Rehearsal(id = changingRehearsal!!.id,name = binding.rehearsalName.text.toString(), time = time,
+            date = "${binding.rehearsalDate.text}", timeInMiles = calendar.timeInMillis, activated = changingRehearsal!!.activated,
+            location = selectedCoordinate, placeName = binding.coordinate.text.toString()))
+        // Отмена включённого оповещения
+        val myIntent = Intent(
+            Runtime.getApplicationContext(),
+            AlarmReceiver::class.java
+        )
+        val pendingIntent = PendingIntent.getBroadcast(
+            Runtime.getApplicationContext(), (changingRehearsal!!.id).toInt(), myIntent, PendingIntent.FLAG_IMMUTABLE
+        )
+        alarmManager.cancel(pendingIntent)
+        // Добавление изменённого
+        val alarmIntent = Intent(context, AlarmReceiver::class.java).apply {
+            putExtra("rehearsal_name", binding.rehearsalName.text.toString())
+            putExtra("coordinate", selectedCoordinate)
+        }.let {
+            PendingIntent.getBroadcast(context, (changingRehearsal!!.id).toInt(), it, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE )
+        }
+        alarmManager.setExact(
+            AlarmManager.RTC_WAKEUP,
+            calendar.timeInMillis,
+            alarmIntent
+        )
+        // Переход ко списку событий
+        requireActivity().onBackPressed()
     }
 
     @RequiresApi(Build.VERSION_CODES.S)
@@ -280,7 +296,6 @@ class HomeFragment : Fragment() {
 
     // Загрузка геолокации пользователя
     private  fun getLocation() {
-
         // Проверка выданныъ разрешений
         if (ActivityCompat.checkSelfPermission(
                 requireActivity(),
@@ -368,14 +383,18 @@ class HomeFragment : Fragment() {
         val formatterTime = DateTimeFormatter.ofPattern("HH:mm")
         val currentTime = LocalDateTime.now().format(formatterTime)
         // Получение введённого времени
-        val time = "${binding.timePicker.hour}" +
+        var time = "${binding.timePicker.hour}" +
                 if(binding.timePicker.minute <= 9)
                     ":0${binding.timePicker.minute}"
                 else
                     ":${binding.timePicker.minute}"
+
+        if(time.length == 4)
+            time = "0$time"
+        Log.i(time, currentTime)
         // Проверка на заполнение полей
         if (name.isNotEmpty() && date.isNotEmpty() && coordinate.isNotEmpty()) {
-            if( (binding.rehearsalDate.text.toString() < currentDate ) || (binding.rehearsalDate.text.toString() == currentDate
+            if( checkDate(binding.rehearsalDate.text.toString(), currentDate ) || (binding.rehearsalDate.text.toString() == currentDate
                         && time <= currentTime)){
                 Toast.makeText(requireContext(), "Необходимо ввести предстоящее событие", Toast.LENGTH_LONG).show()
                 return
@@ -418,11 +437,13 @@ class HomeFragment : Fragment() {
                 // Добавление оповещения
                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, alarmIntent)
                 // Время с добавлением 0 в случае однозначного количества минут
-                val time = "${binding.timePicker.hour}" +
+                var time = "${binding.timePicker.hour}" +
                 if(binding.timePicker.minute <= 9)
                     ":0${binding.timePicker.minute}"
                 else
                     ":${binding.timePicker.minute}"
+                if(time.length == 4)
+                    time = "0$time"
                 rehearsalViewModel.insert(Rehearsal(name = name, time = time,
                     date = "${binding.rehearsalDate.text}", timeInMiles = calendar.timeInMillis, activated = true,
                     location = selectedCoordinate, placeName = coordinate))
